@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 public class Heap {
@@ -32,8 +31,6 @@ public class Heap {
             return;
         }
         heapify_down();
-
-
     }
 
     private static void heapify_down() {
@@ -60,7 +57,7 @@ public class Heap {
                 Collections.swap(list,rightChild,parentIndex);
                 parentIndex = rightChild;
             } else{
-                //means it is at right position and no need to go ahead
+                //means it is at correct position and no need to go ahead
                 break;
             }
 
