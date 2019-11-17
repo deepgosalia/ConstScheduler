@@ -22,10 +22,21 @@ public class RedBlack {
     static Node root;
 
     public static void main(String[] args) {
+        //RL
         insert(1);
+        insert(4);
         insert(2);
-        insert(3);
 
+
+        //LR
+//        insert(3);
+//        insert(1);
+//        insert(2);
+        //RR
+//        insert(1);
+//        insert(2);
+//        insert(3);
+        // LL
 //        insert(5);
 //        insert(2);
 //        insert(1);
@@ -33,7 +44,7 @@ public class RedBlack {
 //        insert(-1);
 //        insert(4);
 //        insert(3);
-        // insert(6);
+
         inorder_traversal(root);
         System.out.println(root.value);
 
@@ -116,27 +127,27 @@ public class RedBlack {
                 //LLb
                 int relation1 = identifyRelation(gp, pp);
                 int relation2 = identifyRelation(pp, p);
-
+                System.out.println(relation1 + " " + relation2);
 
                 if (relation1 == 1 && relation2 == 1) { //LLb
 
                     operationLLb(p, pp, gp);
                 } else if (relation1 == 1 && relation2 == 0) { // LRb
-                    operationLRb();
+                    operationLRb(p, pp, gp);
                 } else if (relation1 == 0 && relation2 == 0) { //RRb
                     operationRRb(p, pp, gp);
                 } else if (relation1 == 0 && relation2 == 1) { //RLb
-                    operationRLb();
+                    operationRLb(p, pp, gp);
                 }
 
             }
             // move 2 level up
             p = p.parent;
-            if (p.parent != null) {
+            if (p != null && p.parent != null) {
                 p = p.parent;
             }
 
-            if (!p.equals(root)) {
+            if (p != null && !p.equals(root)) {
                 pp = p.parent;
                 if (pp != null && !pp.equals(root)) {
                     gp = p.parent;
@@ -156,7 +167,20 @@ public class RedBlack {
 
     }
 
-    private static void operationRLb() {
+    private static void operationRLb(Node p, Node pp, Node gp) {
+        //Here first perform right rotation and then left  LR = RR + LL
+        pp.leftChild = p.rightChild; //b
+        if (pp.leftChild != null) {
+            pp.leftChild.parent = pp;
+        }
+        p.rightChild = pp;
+        pp.parent = p;
+
+        gp.rightChild = p;
+        p.parent = gp;
+
+        //Note: above p will act like pp and vice versa
+        operationRRb(pp, p, gp);
 
     }
 
@@ -187,7 +211,20 @@ public class RedBlack {
         flipColor(gp);
     }
 
-    private static void operationLRb() {
+    private static void operationLRb(Node p, Node pp, Node gp) {
+        //Here first perform right rotation and then left  LR = RR + LL
+        pp.rightChild = p.leftChild; //b
+        if (pp.rightChild != null) {
+            pp.rightChild.parent = pp;
+        }
+        p.leftChild = pp;
+        pp.parent = p;
+
+        gp.leftChild = p;
+        p.parent = gp;
+
+        //Note: above p will act like pp and vice versa
+        operationLLb(pp, p, gp);
 
     }
 
