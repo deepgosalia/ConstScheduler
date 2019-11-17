@@ -22,10 +22,17 @@ public class RedBlack {
     static Node root;
 
     public static void main(String[] args) {
-        //RL
+        //delete
         insert(1);
-        insert(4);
         insert(2);
+        insert(3);
+        insert(4);
+        delete(3);
+
+        //RL
+//        insert(1);
+//        insert(4);
+//        insert(2);
 
 
         //LR
@@ -58,6 +65,112 @@ public class RedBlack {
         inorder_traversal(root.leftChild);
         System.out.println(root.value + " -> " + root.color);
         inorder_traversal(root.rightChild);
+    }
+
+    private static void delete(int val) {
+
+        Node deleted_node = findNode(val, root);
+        if (deleted_node == null) {
+            System.out.println("Node does not exist");
+            return;
+        }
+        // Check the degree
+
+        // TODO delete root
+
+
+
+        //Leaf Node
+        if (deleted_node.leftChild == null && deleted_node.rightChild == null) {
+            deleteLeafNode(deleted_node);
+            return;
+        }
+
+
+        // Node with one child
+
+        if (deleted_node.rightChild == null || deleted_node.leftChild == null) {
+            System.out.println("here");
+            deleteNodeWithDegreeOne(deleted_node);
+
+        }
+    }
+
+    // if RED node is deleted then no re-balancing
+
+
+    private static void deleteLeafNode(Node deleted_node) {
+        if (deleted_node.equals(root)) {
+            root = null;
+        }
+        int relation = getParentChildPointer(deleted_node.parent, deleted_node);
+        if (relation == 1) {
+            if (deleted_node.color == Color.RED) {  // if color is red then no operations needs to be performed further
+                deleted_node.parent.leftChild = null;
+            } else {
+                // we have black leaf
+                //here y is always black
+            }
+        } else {
+            if (deleted_node.color == Color.RED) {
+                deleted_node.parent.rightChild = null;
+            } else {
+                //we have black leaf
+                //here y is always black, since it is null
+            }
+        }
+    }
+
+    // following function handles case when deleted node is black and
+    private static void deleteNodeWithDegreeOne(Node deleted_node) {
+        int relation = identifyRelation(deleted_node.parent, deleted_node);
+        if (deleted_node.color == Color.BLACK && deleted_node.leftChild!=null&&deleted_node.leftChild.color == Color.RED) {
+            //y is deleted_node.leftChild
+            // link y with leftChild of py
+            linkDegreeOne(relation, deleted_node, deleted_node.leftChild);
+            flipColor(deleted_node.leftChild);
+        } else if (deleted_node.color == Color.BLACK && deleted_node.rightChild!=null && deleted_node.rightChild.color == Color.RED) {
+            //y is deleted_node.rightChild
+            // link y with leftChild of py
+            linkDegreeOne(relation, deleted_node, deleted_node.rightChild);
+            flipColor(deleted_node.rightChild);  // make that node black
+        } else if (deleted_node.color == Color.RED && deleted_node.leftChild != null) {
+            linkDegreeOne(relation, deleted_node, deleted_node.leftChild);
+            // here y has to be black because we cant have consecutive red
+
+        } else if (deleted_node.color == Color.RED && deleted_node.rightChild != null) {
+            linkDegreeOne(relation, deleted_node, deleted_node.rightChild);
+        }
+        deleted_node = null;
+
+    }
+
+    private static void linkDegreeOne(int position, Node deleted_node, Node link) {
+        if (position == 1) {
+            deleted_node.parent.leftChild = link;
+        } else {
+            deleted_node.parent.rightChild = link;
+        }
+    }
+
+    private static Node findNode(int val, Node iterator) {
+        if (iterator.value == val) {
+            return iterator;
+        } else if (iterator.value < val) {
+            if (iterator.rightChild != null) {
+                return findNode(val, iterator.rightChild);
+            } else {
+                return null;
+            }
+
+        } else {
+            if (iterator.leftChild != null) {
+                return findNode(val, iterator.leftChild);
+            } else {
+                return null;
+            }
+
+        }
     }
 
     private static void insert(int value) {
