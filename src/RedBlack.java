@@ -19,6 +19,7 @@ class Node {
 }
 
 public class RedBlack {
+
     static Node root;
 
     public static void main(String[] args) {
@@ -79,7 +80,6 @@ public class RedBlack {
         // TODO delete root
 
 
-
         //Leaf Node
         if (deleted_node.leftChild == null && deleted_node.rightChild == null) {
             deleteLeafNode(deleted_node);
@@ -107,9 +107,11 @@ public class RedBlack {
         if (relation == 1) {
             if (deleted_node.color == Color.RED) {  // if color is red then no operations needs to be performed further
                 deleted_node.parent.leftChild = null;
+
             } else {
                 // we have black leaf
                 //here y is always black
+                deleteBlackLeaf(deleted_node, relation);
             }
         } else {
             if (deleted_node.color == Color.RED) {
@@ -117,19 +119,194 @@ public class RedBlack {
             } else {
                 //we have black leaf
                 //here y is always black, since it is null
+                deleteBlackLeaf(deleted_node, relation);
             }
+        }
+    }
+
+    private static void deleteBlackLeaf(Node deleted_node, int relation) {
+        // we first identify what our Xcn is
+        /*if relation is 1 then X=L
+        py's other child could be null therefore c = BLACK or whatever it is
+        then we need number of red child of v
+        if v is nul then 0 else count it
+        * */
+        Color c;
+        Node v, py, y;
+        int n = 0;
+        if (relation == 1) {
+            // get color of node in right side
+
+            // number of red child of v
+            if (deleted_node.parent.rightChild != null) {
+                v = deleted_node.parent.rightChild;
+                c = v.color;  //c
+                if (v.leftChild != null && v.leftChild.color == Color.RED) {
+                    n++;
+                }
+                if (v.rightChild != null && v.rightChild.color == Color.RED) {
+                    n++;
+                }
+            } else {
+                v = null;
+                c = Color.BLACK;
+                //here n will stay 0
+            }
+            py = deleted_node.parent;
+
+            // we first check if deletedNode is leaf or not
+            if (isLeaf(deleted_node)) {
+                y = null;
+                py.leftChild = null;
+            } else {
+                if (deleted_node.leftChild == null) {
+                    //means y is at the right
+                    py.leftChild = deleted_node.rightChild;
+                    y = deleted_node.rightChild;
+                    y.parent = py;
+                } else {
+                    py.leftChild = deleted_node.leftChild;
+                    y = deleted_node.leftChild;
+                    y.parent = py;
+                }
+            }
+            // now we delete that node and link its parent to null
+        } else {
+            if (deleted_node.parent.leftChild != null) {
+                v = deleted_node.parent.leftChild;
+                c = v.color;
+                if (v.leftChild != null && v.leftChild.color == Color.RED) {
+                    n++;
+                }
+                if (v.rightChild != null && v.rightChild.color == Color.RED) {
+                    n++;
+                }
+            } else {
+                v = null;
+                c = Color.BLACK;
+            }
+            py = deleted_node.parent;
+            if (isLeaf(deleted_node)) {
+                y = null;
+                py.rightChild = null;
+            } else {
+                if (deleted_node.leftChild == null) {
+                    //means y is at the right
+                    py.rightChild = deleted_node.rightChild;
+                    y = deleted_node.rightChild;
+                    y.parent = py;
+                } else {
+                    py.rightChild = deleted_node.leftChild;
+                    y = deleted_node.leftChild;
+                    y.parent = py;
+                }
+            }
+        }
+
+
+        // case 0 -> n=0 and v is black Xb0
+        if (n == 0 && (v == null || v.color == Color.BLACK)) {
+            //X = R
+            operationXb0(py, v);
+        }
+
+
+        // Case 1 -> Xb1
+        int r1 = identifyRelation(py, v);
+        if (n == 1 && v.color == Color.BLACK) { // v cannot be null
+            // identify whether it is LL or LR or its symmetric
+
+            int r2;
+            // we need to get node whose color is red and parent in v
+            Node a;
+            if (v.leftChild != null) {
+                a = v.leftChild;
+                r2 = 1;
+            } else {
+                a = v.rightChild;
+                r2 = 0;
+            }
+
+            operationXb1(r1, r2, a, v, py); // py,v,a -> p,pp,gp
+        }
+
+        // Case 2-> Xb2
+        int r2;
+        Node w;
+        if (n == 2 && v.color == Color.BLACK) {
+            if (r1 == 1) {
+                r2 = 0;  // we select opposite since we need LR or RL
+                w = v.rightChild;
+            } else {
+                r2 = 1;
+                w = v.leftChild;
+            }
+
+            operationXb2(r1, r2, w, v, py);
+
+        }
+
+        // Case 3 -> Xrn
+        
+
+
+    }
+
+    private static void operationXb2(int relation1, int relation2, Node p, Node pp, Node gp) {
+        if (relation1 == 1 && relation2 == 0) { // LRb
+            operationLRb(p, pp, gp);
+        } else if (relation1 == 0 && relation2 == 1) { //RLb
+            operationRLb(p, pp, gp);
+        }
+
+        //negate the change done by rotation
+        flipColor(gp);
+        flipColor(pp);
+        // we need to change color of child of v
+        flipColor(p);
+    }
+
+    private static boolean isLeaf(Node deleted_node) {
+        return deleted_node.leftChild == null && deleted_node.rightChild == null;
+    }
+
+
+    private static void operationXb1(int relation1, int relation2, Node p, Node pp, Node gp) {
+        if (relation1 == 1 && relation2 == 1) { //LLb
+            operationLLb(p, pp, gp);
+        } else if (relation1 == 1 && relation2 == 0) { // LRb
+            operationLRb(p, pp, gp);
+        } else if (relation1 == 0 && relation2 == 0) { //RRb
+            operationRRb(p, pp, gp);
+        } else if (relation1 == 0 && relation2 == 1) { //RLb
+            operationRLb(p, pp, gp);
+        }
+        //negate the change done by rotation
+        flipColor(gp);
+        flipColor(pp);
+        // we need to change color of child of v
+        flipColor(p);
+
+    }
+
+    private static void operationXb0(Node py, Node v) {
+        if (py.color == Color.BLACK) {
+            flipColor(v); // TODO go up and re balance
+        } else {
+            flipColor(v);
+            flipColor(py);
         }
     }
 
     // following function handles case when deleted node is black and
     private static void deleteNodeWithDegreeOne(Node deleted_node) {
         int relation = identifyRelation(deleted_node.parent, deleted_node);
-        if (deleted_node.color == Color.BLACK && deleted_node.leftChild!=null&&deleted_node.leftChild.color == Color.RED) {
+        if (deleted_node.color == Color.BLACK && deleted_node.leftChild != null && deleted_node.leftChild.color == Color.RED) {
             //y is deleted_node.leftChild
             // link y with leftChild of py
             linkDegreeOne(relation, deleted_node, deleted_node.leftChild);
             flipColor(deleted_node.leftChild);
-        } else if (deleted_node.color == Color.BLACK && deleted_node.rightChild!=null && deleted_node.rightChild.color == Color.RED) {
+        } else if (deleted_node.color == Color.BLACK && deleted_node.rightChild != null && deleted_node.rightChild.color == Color.RED) {
             //y is deleted_node.rightChild
             // link y with leftChild of py
             linkDegreeOne(relation, deleted_node, deleted_node.rightChild);
@@ -141,7 +318,7 @@ public class RedBlack {
         } else if (deleted_node.color == Color.RED && deleted_node.rightChild != null) {
             linkDegreeOne(relation, deleted_node, deleted_node.rightChild);
         }
-        deleted_node = null;
+
 
     }
 
@@ -243,7 +420,6 @@ public class RedBlack {
                 System.out.println(relation1 + " " + relation2);
 
                 if (relation1 == 1 && relation2 == 1) { //LLb
-
                     operationLLb(p, pp, gp);
                 } else if (relation1 == 1 && relation2 == 0) { // LRb
                     operationLRb(p, pp, gp);
@@ -271,7 +447,7 @@ public class RedBlack {
         }
     }
 
-    // this will tell what kind of relation it is L or R  1->L and 0 ->
+    // this will tell what kind of relation it is L or R  1->L and 0 ->R
     private static int identifyRelation(Node parent, Node child) {
         if (parent.leftChild != null && parent.leftChild.equals(child)) {
             return 1;
@@ -281,7 +457,7 @@ public class RedBlack {
     }
 
     private static void operationRLb(Node p, Node pp, Node gp) {
-        //Here first perform right rotation and then left  LR = RR + LL
+        //Here first perform right rotation and then left i.e. LR = RR + LL
         pp.leftChild = p.rightChild; //b
         if (pp.leftChild != null) {
             pp.leftChild.parent = pp;
