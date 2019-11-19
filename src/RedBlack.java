@@ -1,5 +1,3 @@
-import com.sun.org.apache.bcel.internal.generic.ARETURN;
-import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 
 enum Color {
     RED, BLACK;
@@ -11,22 +9,24 @@ public class RedBlack {
 
     class Node {
         Color color;
-        int value;
+        int value,executed_time, total_time;
         Node leftChild;
         Node rightChild;
         Node parent; // pointer to parent  easier for re balancing as we go up
 
-        Node(Color c, int value) {
+        Node(Color c, int bldg_no, int executed_time, int total_time) {
             this.color = c;
-            this.value = value;
+            this.value = bldg_no;
             this.leftChild = nil;
             this.rightChild = nil;
             this.parent = nil;
+            this.total_time = total_time;
+            this.executed_time = executed_time;
         }
     }
 
 
-    private Node nil = new Node(Color.BLACK,-999);
+    private Node nil = new Node(Color.BLACK,-999); 
     private Node root=nil;
 
     public static void main(String[] args) {
