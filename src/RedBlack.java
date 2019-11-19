@@ -1,3 +1,5 @@
+import org.omg.Messaging.SYNC_WITH_TRANSPORT;
+
 enum Color {
     RED, BLACK;
 }
@@ -8,7 +10,7 @@ class Node {
     Node leftChild;
     Node rightChild;
     Node parent; // pointer to parent  easier for re balancing as we go up
-
+    Node nil = new Node(Color.BLACK,-999);
     Node(Color c, int value) {
         this.color = c;
         this.value = value;
@@ -24,11 +26,16 @@ public class RedBlack {
 
     public static void main(String[] args) {
         //delete
-        insert(1);
+        insert(10);
         insert(2);
         insert(3);
         insert(4);
-        delete(3);
+        insert(5);
+        insert(6);
+        inorder_traversal(root);
+        System.out.println(root.value);
+        deleteNode(2);
+
 
         //RL
 //        insert(1);
@@ -68,6 +75,194 @@ public class RedBlack {
         inorder_traversal(root.rightChild);
     }
 
+
+    private static void rotateLeft(Node x) {
+        Node y = x.rightChild;
+        x.rightChild = y.leftChild;
+        //move beta to x
+        if (y.leftChild !=null ) {
+            //change beta parent to x
+            y.leftChild.parent = x;
+        }
+        y.parent = x.parent;
+        if (x.parent == null) {
+            root = y;
+            // means it is the root node
+        } else {
+            if (x == x.parent.leftChild) {
+                // means it is the leftChild
+                x.parent.leftChild = y;
+
+            }
+            if (x == x.parent.rightChild) {
+                // means it is rightChild
+                x.parent.rightChild = y;
+
+            }
+            // update y
+            y.leftChild = x;
+            x.parent = y;
+        }
+
+
+    }
+
+    private static void rotateRight(Node x) {
+        Node y = x.leftChild;
+        x.leftChild = y.rightChild;
+        //move beta to x
+        if (y.rightChild != null) {
+            //change beta parent to x
+            y.rightChild.parent = x;
+        }
+        y.parent = x.parent;
+        if (x.parent == null) {
+            root = y;
+            // means it is the root node
+        } else {
+            if (x == x.parent.rightChild) {
+                // means it is the leftChild
+                x.parent.rightChild = y;
+
+            }
+            if (x == x.parent.leftChild) {
+                // means it is rightChild
+                x.parent.leftChild = y;
+
+            }
+            // update y
+            y.rightChild = x;
+            x.parent = y;
+        }
+
+
+    }
+
+    private static void deleteNode(int val) {
+        Node deleted_node = findNode(val, root);
+        if (deleted_node == null) {
+            System.out.println("Node does not exist");
+            return;
+        }
+        Node y = deleted_node;
+        Color y_color = y.color;
+        Node toBeFixed, replacement;
+        // case 1-> when we have degree one node to be deleted
+        if (deleted_node.leftChild == null) {
+            // even if we were at leaf then we will linking to null
+            toBeFixed = deleted_node.rightChild;
+            reLinkNodes(deleted_node, deleted_node.rightChild);
+        } else if (deleted_node.rightChild == null) {
+            toBeFixed = deleted_node.leftChild;
+            reLinkNodes(deleted_node, deleted_node.leftChild);
+        } else {
+            replacement = findInorderSuccessor(deleted_node);
+            y_color = replacement.color;
+            // now we relink it with the parent of deletedNode
+            toBeFixed = replacement.rightChild;
+            if (replacement.parent == deleted_node) {
+                toBeFixed.parent = replacement; // simply link it
+            } else {
+                // then we link the replacement's right child since left will be definitely null
+                // this below procedure will link whatever subtree replacement had before deleting it
+                reLinkNodes(replacement, replacement.rightChild);
+                replacement.rightChild = deleted_node.rightChild;  // replacement will inherit whatever deleted node had
+                replacement.rightChild.parent = replacement;  // it is like linking deleted node's right child
+            }
+            reLinkNodes(deleted_node, replacement); // final replacement
+            replacement.leftChild = deleted_node.leftChild;
+            deleted_node.leftChild.parent = replacement;
+            replacement.color = deleted_node.color;
+        }
+        if (y_color == Color.BLACK) {
+            deleteFix(toBeFixed);
+        }
+    }
+
+    private static void deleteFix(Node toBeFixed) {
+        while (toBeFixed != root && toBeFixed.color == Color.BLACK) {
+            Node w;
+            if (toBeFixed == toBeFixed.parent.leftChild) {
+                w = toBeFixed.parent.rightChild;
+                if (w.color == Color.RED) {
+                    w.color = Color.BLACK;
+                    toBeFixed.parent.color = Color.RED;
+                    rotateLeft(toBeFixed.parent);
+                    w = toBeFixed.parent.rightChild; // go up
+                }
+
+                if (w.leftChild.color == Color.BLACK && w.rightChild.color == Color.BLACK) {
+                    w.color = Color.RED;
+                    toBeFixed = toBeFixed.parent;
+                } else if (w.rightChild.color == Color.BLACK) {
+                    w.leftChild.color = Color.BLACK;
+                    w.color = Color.RED;
+                    rotateRight(w);
+                    w = toBeFixed.parent.rightChild;
+                }
+                if (w.rightChild.color == Color.RED) {
+                    w.color = toBeFixed.parent.color;
+                    toBeFixed.parent.color = Color.BLACK;
+                    w.rightChild.color = Color.BLACK;
+                    rotateLeft(toBeFixed.parent);
+                    toBeFixed = root;  // no need to go further
+                }
+            } else {
+                w = toBeFixed.parent.leftChild;
+                if (w.color == Color.RED) {
+                    w.color = Color.BLACK;
+                    toBeFixed.parent.color = Color.RED;
+                    rotateRight(toBeFixed.parent);
+                    w = toBeFixed.parent.leftChild; // go up
+                }
+
+                if (w.rightChild.color == Color.BLACK && w.leftChild.color == Color.BLACK) {
+                    w.color = Color.RED;
+                    toBeFixed = toBeFixed.parent;
+                } else if (w.leftChild.color == Color.BLACK) {
+                    w.rightChild.color = Color.BLACK;
+                    w.color = Color.RED;
+                    rotateLeft(w);
+                    w = toBeFixed.parent.leftChild;
+                }
+                if (w.leftChild.color == Color.RED) {
+                    w.color = toBeFixed.parent.color;
+                    toBeFixed.parent.color = Color.BLACK;
+                    w.leftChild.color = Color.BLACK;
+                    rotateRight(toBeFixed.parent);
+                    toBeFixed = root;  // no need to go further
+                }
+            }
+            toBeFixed.color = Color.BLACK;
+        }
+    }
+
+    private static void reLinkNodes(Node deleted_node, Node replacement) {
+        // means we are deleting root
+        if (deleted_node.parent == null) {
+            root = replacement;
+        } else if (deleted_node == deleted_node.parent.leftChild) {
+            deleted_node.parent.leftChild = replacement;
+        } else {
+            deleted_node.parent.rightChild = replacement;
+        }
+        if (replacement != null) {
+            replacement.parent = deleted_node.parent;  // if it was root then it would be linked to null
+
+        }
+    }
+
+    private static Node findInorderSuccessor(Node node) {
+        // here we need to find the replacement in right subtree of node
+        // One more assumption is the right subtree cannot be null if we are having degree 2 node
+        node = node.rightChild;
+        while (node.leftChild != null) {
+            node = node.leftChild;
+        }
+        return node;
+    }
+
+
     private static void delete(int val) {
 
         Node deleted_node = findNode(val, root);
@@ -75,6 +270,7 @@ public class RedBlack {
             System.out.println("Node does not exist");
             return;
         }
+        rotateRight(deleted_node);
         // Check the degree
 
         // TODO delete root
@@ -82,7 +278,8 @@ public class RedBlack {
 
         //Leaf Node
         if (deleted_node.leftChild == null && deleted_node.rightChild == null) {
-            deleteLeafNode(deleted_node);
+            System.out.println("Degree 0");
+            //deleteLeafNode(deleted_node);
             return;
         }
 
@@ -90,8 +287,14 @@ public class RedBlack {
         // Node with one child
 
         if (deleted_node.rightChild == null || deleted_node.leftChild == null) {
-            System.out.println("here");
-            deleteNodeWithDegreeOne(deleted_node);
+            System.out.println("Degree 1");
+            // deleteNodeWithDegreeOne(deleted_node);
+
+        }
+
+
+        if (deleted_node.rightChild != null && deleted_node.leftChild != null) {
+            // System.out.println("Degree 2");
 
         }
     }
@@ -247,7 +450,10 @@ public class RedBlack {
         }
 
         // Case 3 -> Xrn
-        
+
+        if (v != null && v.color == Color.RED) {
+            System.out.println("V is red");
+        }
 
 
     }
