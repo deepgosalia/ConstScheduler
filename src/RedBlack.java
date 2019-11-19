@@ -1,41 +1,53 @@
+import com.sun.org.apache.bcel.internal.generic.ARETURN;
 import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 
 enum Color {
     RED, BLACK;
 }
 
-class Node {
-    Color color;
-    int value;
-    Node leftChild;
-    Node rightChild;
-    Node parent; // pointer to parent  easier for re balancing as we go up
-    Node nil = new Node(Color.BLACK,-999);
-    Node(Color c, int value) {
-        this.color = c;
-        this.value = value;
-        this.leftChild = null;
-        this.rightChild = null;
-        this.parent = null;
-    }
-}
+
 
 public class RedBlack {
 
-    static Node root;
+    class Node {
+        Color color;
+        int value;
+        Node leftChild;
+        Node rightChild;
+        Node parent; // pointer to parent  easier for re balancing as we go up
+
+        Node(Color c, int value) {
+            this.color = c;
+            this.value = value;
+            this.leftChild = nil;
+            this.rightChild = nil;
+            this.parent = nil;
+        }
+    }
+
+
+    private Node nil = new Node(Color.BLACK,-999);
+    private Node root=nil;
 
     public static void main(String[] args) {
-        //delete
-        insert(10);
-        insert(2);
-        insert(3);
-        insert(4);
-        insert(5);
-        insert(6);
-        inorder_traversal(root);
-        System.out.println(root.value);
-        deleteNode(2);
 
+        RedBlack redBlack = new RedBlack();
+        redBlack.execute();
+
+    }
+    private void execute(){
+        //delete
+        this.insert(10);
+        this.insert(2);
+        this.insert(3);
+        this.insert(4);
+        this.insert(5);
+        this.insert(6);
+
+        this.inorder_traversal(root);
+        this.deleteNode(3);
+        System.out.println();
+        this.inorder_traversal(root);
 
         //RL
 //        insert(1);
@@ -60,32 +72,30 @@ public class RedBlack {
 //        insert(4);
 //        insert(3);
 
-        inorder_traversal(root);
-        System.out.println(root.value);
 
     }
 
     // for testing
-    private static void inorder_traversal(Node root) {
-        if (root == null) {
+    private void inorder_traversal(Node root) {
+        if (root == nil) {
             return;
         }
         inorder_traversal(root.leftChild);
-        System.out.println(root.value + " -> " + root.color);
+        System.out.println(root.parent.value + " "+ root.value + " -> " + root.color);
         inorder_traversal(root.rightChild);
     }
 
 
-    private static void rotateLeft(Node x) {
+    private void rotateLeft(Node x) {
         Node y = x.rightChild;
         x.rightChild = y.leftChild;
         //move beta to x
-        if (y.leftChild !=null ) {
+        if (y.leftChild !=nil ) {
             //change beta parent to x
             y.leftChild.parent = x;
         }
         y.parent = x.parent;
-        if (x.parent == null) {
+        if (x.parent == nil) {
             root = y;
             // means it is the root node
         } else {
@@ -94,29 +104,30 @@ public class RedBlack {
                 x.parent.leftChild = y;
 
             }
-            if (x == x.parent.rightChild) {
+            else if (x == x.parent.rightChild) {
                 // means it is rightChild
                 x.parent.rightChild = y;
 
             }
-            // update y
-            y.leftChild = x;
-            x.parent = y;
+
         }
+        // update y
+        y.leftChild = x;
+        x.parent = y;
 
 
     }
 
-    private static void rotateRight(Node x) {
+    private void rotateRight(Node x) {
         Node y = x.leftChild;
         x.leftChild = y.rightChild;
         //move beta to x
-        if (y.rightChild != null) {
+        if (y.rightChild != nil) {
             //change beta parent to x
             y.rightChild.parent = x;
         }
         y.parent = x.parent;
-        if (x.parent == null) {
+        if (x.parent == nil) {
             root = y;
             // means it is the root node
         } else {
@@ -130,15 +141,16 @@ public class RedBlack {
                 x.parent.leftChild = y;
 
             }
-            // update y
-            y.rightChild = x;
-            x.parent = y;
+
         }
+        // update y
+        y.rightChild = x;
+        x.parent = y;
 
 
     }
 
-    private static void deleteNode(int val) {
+    private void deleteNode(int val) {
         Node deleted_node = findNode(val, root);
         if (deleted_node == null) {
             System.out.println("Node does not exist");
@@ -148,15 +160,15 @@ public class RedBlack {
         Color y_color = y.color;
         Node toBeFixed, replacement;
         // case 1-> when we have degree one node to be deleted
-        if (deleted_node.leftChild == null) {
+        if (deleted_node.leftChild == nil) {
             // even if we were at leaf then we will linking to null
             toBeFixed = deleted_node.rightChild;
             reLinkNodes(deleted_node, deleted_node.rightChild);
-        } else if (deleted_node.rightChild == null) {
+        } else if (deleted_node.rightChild == nil) {
             toBeFixed = deleted_node.leftChild;
             reLinkNodes(deleted_node, deleted_node.leftChild);
         } else {
-            replacement = findInorderSuccessor(deleted_node);
+            replacement = findInorderSuccessor(deleted_node.rightChild);
             y_color = replacement.color;
             // now we relink it with the parent of deletedNode
             toBeFixed = replacement.rightChild;
@@ -179,11 +191,13 @@ public class RedBlack {
         }
     }
 
-    private static void deleteFix(Node toBeFixed) {
+    private void deleteFix(Node toBeFixed) {
+
         while (toBeFixed != root && toBeFixed.color == Color.BLACK) {
-            Node w;
+
             if (toBeFixed == toBeFixed.parent.leftChild) {
-                w = toBeFixed.parent.rightChild;
+
+                Node w = toBeFixed.parent.rightChild;
                 if (w.color == Color.RED) {
                     w.color = Color.BLACK;
                     toBeFixed.parent.color = Color.RED;
@@ -194,6 +208,8 @@ public class RedBlack {
                 if (w.leftChild.color == Color.BLACK && w.rightChild.color == Color.BLACK) {
                     w.color = Color.RED;
                     toBeFixed = toBeFixed.parent;
+
+                    continue;        // TODO change this
                 } else if (w.rightChild.color == Color.BLACK) {
                     w.leftChild.color = Color.BLACK;
                     w.color = Color.RED;
@@ -207,8 +223,10 @@ public class RedBlack {
                     rotateLeft(toBeFixed.parent);
                     toBeFixed = root;  // no need to go further
                 }
+
             } else {
-                w = toBeFixed.parent.leftChild;
+
+                Node w = toBeFixed.parent.leftChild;
                 if (w.color == Color.RED) {
                     w.color = Color.BLACK;
                     toBeFixed.parent.color = Color.RED;
@@ -219,6 +237,7 @@ public class RedBlack {
                 if (w.rightChild.color == Color.BLACK && w.leftChild.color == Color.BLACK) {
                     w.color = Color.RED;
                     toBeFixed = toBeFixed.parent;
+                    continue;
                 } else if (w.leftChild.color == Color.BLACK) {
                     w.rightChild.color = Color.BLACK;
                     w.color = Color.RED;
@@ -235,35 +254,36 @@ public class RedBlack {
             }
             toBeFixed.color = Color.BLACK;
         }
+       // inorder_traversal(root);
     }
 
-    private static void reLinkNodes(Node deleted_node, Node replacement) {
+    private void reLinkNodes(Node deleted_node, Node replacement) {
         // means we are deleting root
-        if (deleted_node.parent == null) {
+        if (deleted_node.parent == nil) {
             root = replacement;
         } else if (deleted_node == deleted_node.parent.leftChild) {
             deleted_node.parent.leftChild = replacement;
         } else {
             deleted_node.parent.rightChild = replacement;
         }
-        if (replacement != null) {
+
             replacement.parent = deleted_node.parent;  // if it was root then it would be linked to null
 
-        }
+
     }
 
-    private static Node findInorderSuccessor(Node node) {
+    private Node findInorderSuccessor(Node node) {
         // here we need to find the replacement in right subtree of node
         // One more assumption is the right subtree cannot be null if we are having degree 2 node
-        node = node.rightChild;
-        while (node.leftChild != null) {
+        while (node.leftChild != nil) {
             node = node.leftChild;
         }
         return node;
     }
 
 
-    private static void delete(int val) {
+    private void delete(int val)
+    {
 
         Node deleted_node = findNode(val, root);
         if (deleted_node == null) {
@@ -302,7 +322,7 @@ public class RedBlack {
     // if RED node is deleted then no re-balancing
 
 
-    private static void deleteLeafNode(Node deleted_node) {
+    private void deleteLeafNode(Node deleted_node) {
         if (deleted_node.equals(root)) {
             root = null;
         }
@@ -327,7 +347,7 @@ public class RedBlack {
         }
     }
 
-    private static void deleteBlackLeaf(Node deleted_node, int relation) {
+    private void deleteBlackLeaf(Node deleted_node, int relation) {
         // we first identify what our Xcn is
         /*if relation is 1 then X=L
         py's other child could be null therefore c = BLACK or whatever it is
@@ -458,7 +478,7 @@ public class RedBlack {
 
     }
 
-    private static void operationXb2(int relation1, int relation2, Node p, Node pp, Node gp) {
+    private void operationXb2(int relation1, int relation2, Node p, Node pp, Node gp) {
         if (relation1 == 1 && relation2 == 0) { // LRb
             operationLRb(p, pp, gp);
         } else if (relation1 == 0 && relation2 == 1) { //RLb
@@ -472,12 +492,12 @@ public class RedBlack {
         flipColor(p);
     }
 
-    private static boolean isLeaf(Node deleted_node) {
+    private boolean isLeaf(Node deleted_node) {
         return deleted_node.leftChild == null && deleted_node.rightChild == null;
     }
 
 
-    private static void operationXb1(int relation1, int relation2, Node p, Node pp, Node gp) {
+    private void operationXb1(int relation1, int relation2, Node p, Node pp, Node gp) {
         if (relation1 == 1 && relation2 == 1) { //LLb
             operationLLb(p, pp, gp);
         } else if (relation1 == 1 && relation2 == 0) { // LRb
@@ -495,7 +515,7 @@ public class RedBlack {
 
     }
 
-    private static void operationXb0(Node py, Node v) {
+    private void operationXb0(Node py, Node v) {
         if (py.color == Color.BLACK) {
             flipColor(v); // TODO go up and re balance
         } else {
@@ -505,7 +525,7 @@ public class RedBlack {
     }
 
     // following function handles case when deleted node is black and
-    private static void deleteNodeWithDegreeOne(Node deleted_node) {
+    private void deleteNodeWithDegreeOne(Node deleted_node) {
         int relation = identifyRelation(deleted_node.parent, deleted_node);
         if (deleted_node.color == Color.BLACK && deleted_node.leftChild != null && deleted_node.leftChild.color == Color.RED) {
             //y is deleted_node.leftChild
@@ -528,7 +548,7 @@ public class RedBlack {
 
     }
 
-    private static void linkDegreeOne(int position, Node deleted_node, Node link) {
+    private void linkDegreeOne(int position, Node deleted_node, Node link) {
         if (position == 1) {
             deleted_node.parent.leftChild = link;
         } else {
@@ -536,18 +556,22 @@ public class RedBlack {
         }
     }
 
-    private static Node findNode(int val, Node iterator) {
+    private Node findNode(int val, Node iterator) {
+        if(root==nil){
+            return null;
+        }
+
         if (iterator.value == val) {
             return iterator;
         } else if (iterator.value < val) {
-            if (iterator.rightChild != null) {
+            if (iterator.rightChild != nil) {
                 return findNode(val, iterator.rightChild);
             } else {
                 return null;
             }
 
         } else {
-            if (iterator.leftChild != null) {
+            if (iterator.leftChild != nil) {
                 return findNode(val, iterator.leftChild);
             } else {
                 return null;
@@ -556,24 +580,25 @@ public class RedBlack {
         }
     }
 
-    private static void insert(int value) {
+    private void insert(int value) {
 
         /**
          * 1. Root is always black
          * 2. New Node is given RED
          */
 
-        if (root == null) {
+        if (root == nil) {
             root = new Node(Color.BLACK, value);
+            root.parent = nil;
             return;
         }
         // find correct position of new node
         Node iterator = root;
         Node p, pp, gp;
-        gp = null; // when inserted as the child of root
+        //gp = null; // when inserted as the child of root
         while (true) {
             if (iterator.value < value) {
-                if (iterator.rightChild == null) {
+                if (iterator.rightChild == nil) {
                     iterator.rightChild = new Node(Color.RED, value);
                     p = iterator.rightChild; //pointer to new node
                     p.parent = iterator;
@@ -583,7 +608,7 @@ public class RedBlack {
                 }
 
             } else if (iterator.value > value) {     //TODO add = for duplicate
-                if (iterator.leftChild == null) {
+                if (iterator.leftChild == nil) {
                     iterator.leftChild = new Node(Color.RED, value);
                     p = iterator.leftChild; //pointer to new node
                     p.parent = iterator;
@@ -600,14 +625,14 @@ public class RedBlack {
         insert_balancing(p, pp, gp);
     }
 
-    private static void insert_balancing(Node p, Node pp, Node gp) {
+    private void insert_balancing(Node p, Node pp, Node gp) {
 
         if (checkIfConsecutiveRed(p, pp, gp)) {
             //perform XYz operation
             // check child of color of gp i.e. color of z
             Node d = getChildOfGrandParent(pp, gp);  // this will return our 'd' node
             Color c_d;
-            if (d == null) {
+            if (d == nil) {
                 c_d = Color.BLACK;  // external node
             } else {
                 c_d = d.color;
@@ -638,13 +663,13 @@ public class RedBlack {
             }
             // move 2 level up
             p = p.parent;
-            if (p != null && p.parent != null) {
+            if (p != nil && p.parent != nil) {
                 p = p.parent;
             }
 
-            if (p != null && !p.equals(root)) {
+            if (p != nil && !p.equals(root)) {
                 pp = p.parent;
-                if (pp != null && !pp.equals(root)) {
+                if (pp != nil && !pp.equals(root)) {
                     gp = p.parent;
                     insert_balancing(p, pp, gp);
                 }
@@ -654,18 +679,17 @@ public class RedBlack {
     }
 
     // this will tell what kind of relation it is L or R  1->L and 0 ->R
-    private static int identifyRelation(Node parent, Node child) {
-        if (parent.leftChild != null && parent.leftChild.equals(child)) {
+    private int identifyRelation(Node parent, Node child) {
+        if (parent.leftChild != nil && parent.leftChild.equals(child)) {
             return 1;
         }
         return 0;
-
     }
 
-    private static void operationRLb(Node p, Node pp, Node gp) {
+    private void operationRLb(Node p, Node pp, Node gp) {
         //Here first perform right rotation and then left i.e. LR = RR + LL
         pp.leftChild = p.rightChild; //b
-        if (pp.leftChild != null) {
+        if (pp.leftChild != nil) {
             pp.leftChild.parent = pp;
         }
         p.rightChild = pp;
@@ -679,15 +703,15 @@ public class RedBlack {
 
     }
 
-    private static void operationRRb(Node p, Node pp, Node gp) {
+    private void operationRRb(Node p, Node pp, Node gp) {
         gp.rightChild = pp.leftChild;  // c
-        if (pp.leftChild != null) {
+        if (pp.leftChild != nil) {
             pp.leftChild.parent = gp;
         }
         pp.leftChild = gp;
         if (gp.equals(root)) {
             root = pp;
-            pp.parent = null;
+            pp.parent = nil;
         } else {
             // we need pointer which connects gp to its parent
             int relation = getParentChildPointer(gp.parent, gp); // L->1, R->0
@@ -706,10 +730,10 @@ public class RedBlack {
         flipColor(gp);
     }
 
-    private static void operationLRb(Node p, Node pp, Node gp) {
+    private void operationLRb(Node p, Node pp, Node gp) {
         //Here first perform right rotation and then left  LR = RR + LL
         pp.rightChild = p.leftChild; //b
-        if (pp.rightChild != null) {
+        if (pp.rightChild != nil) {
             pp.rightChild.parent = pp;
         }
         p.leftChild = pp;
@@ -723,15 +747,15 @@ public class RedBlack {
 
     }
 
-    private static void operationLLb(Node p, Node pp, Node gp) {
+    private void operationLLb(Node p, Node pp, Node gp) {
         gp.leftChild = pp.rightChild;  // c
-        if (pp.rightChild != null) {
+        if (pp.rightChild != nil) {
             pp.rightChild.parent = gp;
         }
         pp.rightChild = gp;
         if (gp.equals(root)) {
             root = pp;
-            pp.parent = null;
+            pp.parent = nil;
         } else {
             // we need pointer which connects gp to its parent
             int relation = getParentChildPointer(gp.parent, gp); // L->1, R->0
@@ -750,15 +774,15 @@ public class RedBlack {
         flipColor(gp);
     }
 
-    private static int getParentChildPointer(Node parent, Node child) {
-        if (parent.leftChild != null && parent.leftChild.equals(child)) {
+    private int getParentChildPointer(Node parent, Node child) {
+        if (parent.leftChild != nil && parent.leftChild.equals(child)) {
             return 1;
         }
         return 0;
     }
 
 
-    private static void operationXYr(Node pp, Node gp, Node d) {
+    private void operationXYr(Node pp, Node gp, Node d) {
 //        if (!gp.equals(root)) {
 //            flipColor(gp);   // we don't flip
 //        }
@@ -767,7 +791,7 @@ public class RedBlack {
         flipColor(pp);
     }
 
-    private static void flipColor(Node node) {
+    private void flipColor(Node node) {
         if (node.equals(root)) {
             node.color = Color.BLACK;
             return;
@@ -779,9 +803,9 @@ public class RedBlack {
         node.color = Color.RED;
     }
 
-    private static Node getChildOfGrandParent(Node pp, Node gp) {
-        if (gp.leftChild == null || gp.rightChild == null) {
-            return null;  //external node
+    private Node getChildOfGrandParent(Node pp, Node gp) {
+        if (gp.leftChild == nil || gp.rightChild == nil) {
+            return nil;  //external node
         }
         if (gp.leftChild.equals(pp)) {
             return gp.rightChild;
@@ -789,8 +813,8 @@ public class RedBlack {
         return gp.leftChild;
     }
 
-    private static boolean checkIfConsecutiveRed(Node p, Node pp, Node gp) {
-        if (gp == null) {
+    private boolean checkIfConsecutiveRed(Node p, Node pp, Node gp) {
+        if (gp == nil) {
             // it means that it is inserted as child of root and pp has to be black
             return false;
         }

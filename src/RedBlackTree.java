@@ -23,7 +23,7 @@ public class RedBlackTree {
             return;
         }
         printTree(node.left);
-        System.out.print(((node.color==RED)?"Color: Red ":"Color: Black ")+"Key: "+node.key+" Parent: "+node.parent.key+"\n");
+        System.out.print("Color "+ node.color +" Key: "+node.key+" Parent: "+node.parent.key+"\n");
         printTree(node.right);
     }
 
@@ -332,7 +332,7 @@ public class RedBlackTree {
                         item = scan.nextInt();
                     }
                     System.out.println();
-                    printTree(root);
+                    //printTree(root);
                     break;
                 case 3:
                     item = scan.nextInt();
