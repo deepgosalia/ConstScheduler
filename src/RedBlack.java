@@ -1,33 +1,17 @@
-
-enum Color {
-    RED, BLACK;
-}
-
-
+//
+//enum Color {
+//    RED, BLACK;
+//}
+//
+//class Node {
+//
+//}
 
 public class RedBlack {
 
-    class Node {
-        Color color;
-        int value,executed_time, total_time;
-        Node leftChild;
-        Node rightChild;
-        Node parent; // pointer to parent  easier for re balancing as we go up
 
-        Node(Color c, int bldg_no, int executed_time, int total_time) {
-            this.color = c;
-            this.value = bldg_no;
-            this.leftChild = nil;
-            this.rightChild = nil;
-            this.parent = nil;
-            this.total_time = total_time;
-            this.executed_time = executed_time;
-        }
-    }
-
-
-    private Node nil = new Node(Color.BLACK,-999); 
-    private Node root=nil;
+    private Node nil = new Node(Color.BLACK, -999, -99, -9, null);
+    private Node root = nil;
 
     public static void main(String[] args) {
 
@@ -35,62 +19,41 @@ public class RedBlack {
         redBlack.execute();
 
     }
-    private void execute(){
+
+    public void execute() {
         //delete
-        this.insert(10);
-        this.insert(2);
-        this.insert(3);
-        this.insert(4);
-        this.insert(5);
-        this.insert(6);
-
-        this.inorder_traversal(root);
-        this.deleteNode(3);
-        System.out.println();
-        this.inorder_traversal(root);
-
-        //RL
-//        insert(1);
-//        insert(4);
-//        insert(2);
-
-
-        //LR
-//        insert(3);
-//        insert(1);
-//        insert(2);
-        //RR
-//        insert(1);
-//        insert(2);
-//        insert(3);
-        // LL
-//        insert(5);
-//        insert(2);
-//        insert(1);
-//        insert(0);
-//        insert(-1);
-//        insert(4);
-//        insert(3);
+//        this.insert(10);
+//        this.insert(2);
+//        this.insert(3);
+//        this.insert(4);
+//        this.insert(5);
+//        this.insert(6);
 
 
     }
 
+    public Node getNil(){
+        return nil;
+    }
     // for testing
-    private void inorder_traversal(Node root) {
+    public void inorder_traversal(Node root) {
         if (root == nil) {
             return;
         }
         inorder_traversal(root.leftChild);
-        System.out.println(root.parent.value + " "+ root.value + " -> " + root.color);
+        System.out.println(root.parent.bldg_no + " " + root.bldg_no + " -> " + root.color);
         inorder_traversal(root.rightChild);
     }
 
+    public Node getRoot(){
+        return root;
+    }
 
-    private void rotateLeft(Node x) {
+    public void rotateLeft(Node x) {
         Node y = x.rightChild;
         x.rightChild = y.leftChild;
         //move beta to x
-        if (y.leftChild !=nil ) {
+        if (y.leftChild != nil) {
             //change beta parent to x
             y.leftChild.parent = x;
         }
@@ -103,8 +66,7 @@ public class RedBlack {
                 // means it is the leftChild
                 x.parent.leftChild = y;
 
-            }
-            else if (x == x.parent.rightChild) {
+            } else if (x == x.parent.rightChild) {
                 // means it is rightChild
                 x.parent.rightChild = y;
 
@@ -115,10 +77,10 @@ public class RedBlack {
         y.leftChild = x;
         x.parent = y;
 
-
     }
 
-    private void rotateRight(Node x) {
+
+    public void rotateRight(Node x) {
         Node y = x.leftChild;
         x.leftChild = y.rightChild;
         //move beta to x
@@ -252,9 +214,10 @@ public class RedBlack {
                     toBeFixed = root;  // no need to go further
                 }
             }
-            toBeFixed.color = Color.BLACK;
+
         }
-       // inorder_traversal(root);
+        toBeFixed.color = Color.BLACK;
+        // inorder_traversal(root);
     }
 
     private void reLinkNodes(Node deleted_node, Node replacement) {
@@ -267,7 +230,7 @@ public class RedBlack {
             deleted_node.parent.rightChild = replacement;
         }
 
-            replacement.parent = deleted_node.parent;  // if it was root then it would be linked to null
+        replacement.parent = deleted_node.parent;  // if it was root then it would be linked to null
 
 
     }
@@ -282,8 +245,7 @@ public class RedBlack {
     }
 
 
-    private void delete(int val)
-    {
+    public void delete(int val) {
 
         Node deleted_node = findNode(val, root);
         if (deleted_node == null) {
@@ -557,13 +519,13 @@ public class RedBlack {
     }
 
     private Node findNode(int val, Node iterator) {
-        if(root==nil){
+        if (root == nil) {
             return null;
         }
 
-        if (iterator.value == val) {
+        if (iterator.bldg_no == val) {
             return iterator;
-        } else if (iterator.value < val) {
+        } else if (iterator.bldg_no < val) {
             if (iterator.rightChild != nil) {
                 return findNode(val, iterator.rightChild);
             } else {
@@ -580,7 +542,7 @@ public class RedBlack {
         }
     }
 
-    private void insert(int value) {
+    public void insert(Node node) {
 
         /**
          * 1. Root is always black
@@ -588,7 +550,7 @@ public class RedBlack {
          */
 
         if (root == nil) {
-            root = new Node(Color.BLACK, value);
+            root = node;
             root.parent = nil;
             return;
         }
@@ -597,9 +559,9 @@ public class RedBlack {
         Node p, pp, gp;
         //gp = null; // when inserted as the child of root
         while (true) {
-            if (iterator.value < value) {
+            if (iterator.bldg_no < node.bldg_no) {
                 if (iterator.rightChild == nil) {
-                    iterator.rightChild = new Node(Color.RED, value);
+                    iterator.rightChild = node;
                     p = iterator.rightChild; //pointer to new node
                     p.parent = iterator;
                     break;
@@ -607,9 +569,9 @@ public class RedBlack {
                     iterator = iterator.rightChild;
                 }
 
-            } else if (iterator.value > value) {     //TODO add = for duplicate
+            } else if (iterator.bldg_no > node.bldg_no) {     //TODO add = for duplicate
                 if (iterator.leftChild == nil) {
-                    iterator.leftChild = new Node(Color.RED, value);
+                    iterator.leftChild = node;
                     p = iterator.leftChild; //pointer to new node
                     p.parent = iterator;
                     break;
