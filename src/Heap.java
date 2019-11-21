@@ -1,63 +1,50 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 
-//class HeapNode {
-//
-//    int bldg_no, executed_time, total_time;
-//    RedBlack ptr;
-//
-//    HeapNode(int bldg_no, int executed_time, int total_time) {
-//        this.bldg_no = bldg_no;
-//        this.total_time = total_time;
-//        this.executed_time = executed_time;
-//        this.ptr = null;
-//    }
-//
-//}
-
 public class Heap {
+    private List<HeapNode> list;   // TODO  doubt---use linkedList for faster operation?? or use array
 
-
-    private List<Node> list;   //use linkedList for faster operation??
-
-    public static void main(String[] args) {
-        Heap heap = new Heap();
-        heap.execute();
-
-    }
-
-    public void execute() {
+    Heap() {
         list = new ArrayList<>();
-//        insert(1, 5, 10);
-//        insert(2, 4, 10);
-//        insert(3, 4, 10);
-//        insert(4, 6, 10);
-//        insert(5, 3, 10);
-//        removeMin();
-       // print_heap();
-        //removeMin();
-        //print_heap();
     }
 
-    private void insert(Node heapNode) {
-        //HeapNode heapNode = new HeapNode(bldg_no, exec_time, total_time);
+
+    public void insert(HeapNode heapNode) {
         list.add(heapNode);
-        heapify_up();  //check if insert takes place from the bottom
-
+        heapify_up();  //insert takes place from the bottom to top
     }
 
+    public HeapNode removeMin() {
 
-    private void removeMin() {
         if (list.size() == 0) {
             System.out.println("Min Cannot be removed");
-            return;
+            return null;
+        }else{
+            HeapNode minNode = getMin();
+            heapify_down();
+            //System.out.println(minNode);  // TODO check if references  change
+            return minNode;
         }
-        heapify_down();
     }
 
+    public boolean isEmpty() {
+        return list.size() == 0;
+    }
+
+    public void print_heap() {
+        System.out.println("heap size is " + list.size());
+        for (HeapNode heapNode : list) {
+
+            System.out.print("heap is "+heapNode.bldg_no + "->" + heapNode.executed_time + ", ");
+        }
+
+    }
     // below function will handle both the duplicate as well as unique elements
+
+
     private boolean check_duplicate(int child, int parentIndex) {
         if (list.get(child).executed_time == list.get(parentIndex).executed_time) {
             return list.get(child).bldg_no < list.get(parentIndex).bldg_no;
@@ -65,12 +52,17 @@ public class Heap {
     }
 
     private void heapify_down() {
-        if (isEmpty() || list.size() == 1) {
+        if (isEmpty()){
+            return;
+        }
+        if(list.size() == 1){
+            list.remove(0);
             return;
         }
         // replace with the last node
         list.set(0, list.get(list.size() - 1));
         list.remove(list.size() - 1);
+        System.out.println("At heapify_down " + list);
         /* now start checking with children till we reach the last node
         Leaf nodes wont have any children so they will return -1
         * */
@@ -88,12 +80,10 @@ public class Heap {
                 //means it is at correct position and no need to go ahead
                 break;
             }
-
             leftChild = getLeftChild(parentIndex);
             rightChild = getRightChild(parentIndex);
         }
     }
-
 
     private void heapify_up() {
         if (list.size() == 1) {
@@ -108,14 +98,6 @@ public class Heap {
             insert_index = parent_index;
             parent_index = getParent(insert_index);  // return -1 if it is at the root
         }
-    }
-
-
-    private void print_heap() {
-        for (Node heapNode : list) {
-            System.out.println(heapNode.bldg_no + "->" + heapNode.executed_time);
-        }
-
     }
 
     private int getLeftChild(int parentIndex) {
@@ -144,16 +126,12 @@ public class Heap {
         return (int) Math.ceil(childIndex / 2.0) - 1;
     }
 
-    private int getMin() {
+    private HeapNode getMin() {
         if (list.size() > 0) {
-            return list.get(0).executed_time;
+            return list.get(0);
         }
-        return -1;
+        return null;
     }
 
-
-    private boolean isEmpty() {
-        return list.size() == 0;
-    }
 
 }

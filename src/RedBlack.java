@@ -1,42 +1,17 @@
-//
-//enum Color {
-//    RED, BLACK;
-//}
-//
-//class Node {
-//
-//}
+
 
 public class RedBlack {
 
 
-    private Node nil = new Node(Color.BLACK, -999, -99, -9, null);
-    private Node root = nil;
+    private RedBlackNode nil = new RedBlackNode(Color.BLACK, -999, -99, -9, null);
+    private RedBlackNode root = nil;
 
-    public static void main(String[] args) {
-
-        RedBlack redBlack = new RedBlack();
-        redBlack.execute();
-
-    }
-
-    public void execute() {
-        //delete
-//        this.insert(10);
-//        this.insert(2);
-//        this.insert(3);
-//        this.insert(4);
-//        this.insert(5);
-//        this.insert(6);
-
-
-    }
-
-    public Node getNil(){
+    public RedBlackNode getNil() {
         return nil;
     }
+
     // for testing
-    public void inorder_traversal(Node root) {
+    public void inorder_traversal(RedBlackNode root) {
         if (root == nil) {
             return;
         }
@@ -45,209 +20,13 @@ public class RedBlack {
         inorder_traversal(root.rightChild);
     }
 
-    public Node getRoot(){
+    public RedBlackNode getRoot() {
         return root;
     }
 
-    public void rotateLeft(Node x) {
-        Node y = x.rightChild;
-        x.rightChild = y.leftChild;
-        //move beta to x
-        if (y.leftChild != nil) {
-            //change beta parent to x
-            y.leftChild.parent = x;
-        }
-        y.parent = x.parent;
-        if (x.parent == nil) {
-            root = y;
-            // means it is the root node
-        } else {
-            if (x == x.parent.leftChild) {
-                // means it is the leftChild
-                x.parent.leftChild = y;
+    private void delete_node(int val) {
 
-            } else if (x == x.parent.rightChild) {
-                // means it is rightChild
-                x.parent.rightChild = y;
-
-            }
-
-        }
-        // update y
-        y.leftChild = x;
-        x.parent = y;
-
-    }
-
-
-    public void rotateRight(Node x) {
-        Node y = x.leftChild;
-        x.leftChild = y.rightChild;
-        //move beta to x
-        if (y.rightChild != nil) {
-            //change beta parent to x
-            y.rightChild.parent = x;
-        }
-        y.parent = x.parent;
-        if (x.parent == nil) {
-            root = y;
-            // means it is the root node
-        } else {
-            if (x == x.parent.rightChild) {
-                // means it is the leftChild
-                x.parent.rightChild = y;
-
-            }
-            if (x == x.parent.leftChild) {
-                // means it is rightChild
-                x.parent.leftChild = y;
-
-            }
-
-        }
-        // update y
-        y.rightChild = x;
-        x.parent = y;
-
-
-    }
-
-    private void deleteNode(int val) {
-        Node deleted_node = findNode(val, root);
-        if (deleted_node == null) {
-            System.out.println("Node does not exist");
-            return;
-        }
-        Node y = deleted_node;
-        Color y_color = y.color;
-        Node toBeFixed, replacement;
-        // case 1-> when we have degree one node to be deleted
-        if (deleted_node.leftChild == nil) {
-            // even if we were at leaf then we will linking to null
-            toBeFixed = deleted_node.rightChild;
-            reLinkNodes(deleted_node, deleted_node.rightChild);
-        } else if (deleted_node.rightChild == nil) {
-            toBeFixed = deleted_node.leftChild;
-            reLinkNodes(deleted_node, deleted_node.leftChild);
-        } else {
-            replacement = findInorderSuccessor(deleted_node.rightChild);
-            y_color = replacement.color;
-            // now we relink it with the parent of deletedNode
-            toBeFixed = replacement.rightChild;
-            if (replacement.parent == deleted_node) {
-                toBeFixed.parent = replacement; // simply link it
-            } else {
-                // then we link the replacement's right child since left will be definitely null
-                // this below procedure will link whatever subtree replacement had before deleting it
-                reLinkNodes(replacement, replacement.rightChild);
-                replacement.rightChild = deleted_node.rightChild;  // replacement will inherit whatever deleted node had
-                replacement.rightChild.parent = replacement;  // it is like linking deleted node's right child
-            }
-            reLinkNodes(deleted_node, replacement); // final replacement
-            replacement.leftChild = deleted_node.leftChild;
-            deleted_node.leftChild.parent = replacement;
-            replacement.color = deleted_node.color;
-        }
-        if (y_color == Color.BLACK) {
-            deleteFix(toBeFixed);
-        }
-    }
-
-    private void deleteFix(Node toBeFixed) {
-
-        while (toBeFixed != root && toBeFixed.color == Color.BLACK) {
-
-            if (toBeFixed == toBeFixed.parent.leftChild) {
-
-                Node w = toBeFixed.parent.rightChild;
-                if (w.color == Color.RED) {
-                    w.color = Color.BLACK;
-                    toBeFixed.parent.color = Color.RED;
-                    rotateLeft(toBeFixed.parent);
-                    w = toBeFixed.parent.rightChild; // go up
-                }
-
-                if (w.leftChild.color == Color.BLACK && w.rightChild.color == Color.BLACK) {
-                    w.color = Color.RED;
-                    toBeFixed = toBeFixed.parent;
-
-                    continue;        // TODO change this
-                } else if (w.rightChild.color == Color.BLACK) {
-                    w.leftChild.color = Color.BLACK;
-                    w.color = Color.RED;
-                    rotateRight(w);
-                    w = toBeFixed.parent.rightChild;
-                }
-                if (w.rightChild.color == Color.RED) {
-                    w.color = toBeFixed.parent.color;
-                    toBeFixed.parent.color = Color.BLACK;
-                    w.rightChild.color = Color.BLACK;
-                    rotateLeft(toBeFixed.parent);
-                    toBeFixed = root;  // no need to go further
-                }
-
-            } else {
-
-                Node w = toBeFixed.parent.leftChild;
-                if (w.color == Color.RED) {
-                    w.color = Color.BLACK;
-                    toBeFixed.parent.color = Color.RED;
-                    rotateRight(toBeFixed.parent);
-                    w = toBeFixed.parent.leftChild; // go up
-                }
-
-                if (w.rightChild.color == Color.BLACK && w.leftChild.color == Color.BLACK) {
-                    w.color = Color.RED;
-                    toBeFixed = toBeFixed.parent;
-                    continue;
-                } else if (w.leftChild.color == Color.BLACK) {
-                    w.rightChild.color = Color.BLACK;
-                    w.color = Color.RED;
-                    rotateLeft(w);
-                    w = toBeFixed.parent.leftChild;
-                }
-                if (w.leftChild.color == Color.RED) {
-                    w.color = toBeFixed.parent.color;
-                    toBeFixed.parent.color = Color.BLACK;
-                    w.leftChild.color = Color.BLACK;
-                    rotateRight(toBeFixed.parent);
-                    toBeFixed = root;  // no need to go further
-                }
-            }
-
-        }
-        toBeFixed.color = Color.BLACK;
-        // inorder_traversal(root);
-    }
-
-    private void reLinkNodes(Node deleted_node, Node replacement) {
-        // means we are deleting root
-        if (deleted_node.parent == nil) {
-            root = replacement;
-        } else if (deleted_node == deleted_node.parent.leftChild) {
-            deleted_node.parent.leftChild = replacement;
-        } else {
-            deleted_node.parent.rightChild = replacement;
-        }
-
-        replacement.parent = deleted_node.parent;  // if it was root then it would be linked to null
-
-
-    }
-
-    private Node findInorderSuccessor(Node node) {
-        // here we need to find the replacement in right subtree of node
-        // One more assumption is the right subtree cannot be null if we are having degree 2 node
-        while (node.leftChild != nil) {
-            node = node.leftChild;
-        }
-        return node;
-    }
-
-
-    public void delete(int val) {
-
-        Node deleted_node = findNode(val, root);
+        RedBlackNode deleted_node = findNode(val, root);
         if (deleted_node == null) {
             System.out.println("Node does not exist");
             return;
@@ -281,10 +60,250 @@ public class RedBlack {
         }
     }
 
+    public void insert(RedBlackNode node) {
+
+        /**
+         * 1. Root is always black
+         * 2. New RedBlackNode is given RED
+         */
+
+        if (root == nil) {
+            root = node;
+            root.color = Color.BLACK;
+            root.parent = nil;
+            return;
+        }
+        // find correct position of new node
+        RedBlackNode iterator = root;
+        RedBlackNode p, pp, gp;
+        //gp = null; // when inserted as the child of root
+        while (true) {
+            if (iterator.bldg_no < node.bldg_no) {
+                if (iterator.rightChild == nil) {
+                    iterator.rightChild = node;
+                    p = iterator.rightChild; //pointer to new node
+                    p.parent = iterator;
+                    break;
+                } else {
+                    iterator = iterator.rightChild;
+                }
+
+            } else if (iterator.bldg_no > node.bldg_no) {     //TODO add = for duplicate
+                if (iterator.leftChild == nil) {
+                    iterator.leftChild = node;
+                    p = iterator.leftChild; //pointer to new node
+                    p.parent = iterator;
+                    break;
+                } else {
+                    iterator = iterator.leftChild;
+                }
+
+            }
+        }
+        pp = p.parent;
+        gp = pp.parent;  // gp could be null if insertion was at the child of root
+
+        insert_balancing(p, pp, gp);
+    }
+
+    private void rotateLeft(RedBlackNode x) {
+        RedBlackNode y = x.rightChild;
+        x.rightChild = y.leftChild;
+        //move beta to x
+        if (y.leftChild != nil) {
+            //change beta parent to x
+            y.leftChild.parent = x;
+        }
+        y.parent = x.parent;
+        if (x.parent == nil) {
+            root = y;
+            // means it is the root node
+        } else {
+            if (x == x.parent.leftChild) {
+                // means it is the leftChild
+                x.parent.leftChild = y;
+
+            } else if (x == x.parent.rightChild) {
+                // means it is rightChild
+                x.parent.rightChild = y;
+
+            }
+
+        }
+        // update y
+        y.leftChild = x;
+        x.parent = y;
+
+    }
+
+
+    private void rotateRight(RedBlackNode x) {
+        RedBlackNode y = x.leftChild;
+        x.leftChild = y.rightChild;
+        //move beta to x
+        if (y.rightChild != nil) {
+            //change beta parent to x
+            y.rightChild.parent = x;
+        }
+        y.parent = x.parent;
+        if (x.parent == nil) {
+            root = y;
+            // means it is the root node
+        } else {
+            if (x == x.parent.rightChild) {
+                // means it is the leftChild
+                x.parent.rightChild = y;
+
+            }
+            if (x == x.parent.leftChild) {
+                // means it is rightChild
+                x.parent.leftChild = y;
+
+            }
+
+        }
+        // update y
+        y.rightChild = x;
+        x.parent = y;
+
+
+    }
+
+    public void delete(RedBlackNode deleted_node) {
+        if (deleted_node == null) {
+            System.out.println("Node does not exist");
+            return;
+        }
+        RedBlackNode y = deleted_node;
+        Color y_color = y.color;
+        RedBlackNode toBeFixed, replacement;
+        // case 1-> when we have degree one node to be deleted
+        if (deleted_node.leftChild == nil) {
+            // even if we were at leaf then we will linking to null
+            toBeFixed = deleted_node.rightChild;
+            reLinkNodes(deleted_node, deleted_node.rightChild);
+        } else if (deleted_node.rightChild == nil) {
+            toBeFixed = deleted_node.leftChild;
+            reLinkNodes(deleted_node, deleted_node.leftChild);
+        } else {
+            replacement = findInorderSuccessor(deleted_node.rightChild);
+            y_color = replacement.color;
+            // now we relink it with the parent of deletedNode
+            toBeFixed = replacement.rightChild;
+            if (replacement.parent == deleted_node) {
+                toBeFixed.parent = replacement; // simply link it
+            } else {
+                // then we link the replacement's right child since left will be definitely null
+                // this below procedure will link whatever subtree replacement had before deleting it
+                reLinkNodes(replacement, replacement.rightChild);
+                replacement.rightChild = deleted_node.rightChild;  // replacement will inherit whatever deleted node had
+                replacement.rightChild.parent = replacement;  // it is like linking deleted node's right child
+            }
+            reLinkNodes(deleted_node, replacement); // final replacement
+            replacement.leftChild = deleted_node.leftChild;
+            deleted_node.leftChild.parent = replacement;
+            replacement.color = deleted_node.color;
+        }
+        if (y_color == Color.BLACK) {
+            deleteFix(toBeFixed);
+        }
+    }
+
+    private void deleteFix(RedBlackNode toBeFixed) {
+
+        while (toBeFixed != root && toBeFixed.color == Color.BLACK) {
+
+            if (toBeFixed == toBeFixed.parent.leftChild) {
+
+                RedBlackNode w = toBeFixed.parent.rightChild;
+                if (w.color == Color.RED) {
+                    w.color = Color.BLACK;
+                    toBeFixed.parent.color = Color.RED;
+                    rotateLeft(toBeFixed.parent);
+                    w = toBeFixed.parent.rightChild; // go up
+                }
+
+                if (w.leftChild.color == Color.BLACK && w.rightChild.color == Color.BLACK) {
+                    w.color = Color.RED;
+                    toBeFixed = toBeFixed.parent;
+
+                    continue;        // TODO change this
+                } else if (w.rightChild.color == Color.BLACK) {
+                    w.leftChild.color = Color.BLACK;
+                    w.color = Color.RED;
+                    rotateRight(w);
+                    w = toBeFixed.parent.rightChild;
+                }
+                if (w.rightChild.color == Color.RED) {
+                    w.color = toBeFixed.parent.color;
+                    toBeFixed.parent.color = Color.BLACK;
+                    w.rightChild.color = Color.BLACK;
+                    rotateLeft(toBeFixed.parent);
+                    toBeFixed = root;  // no need to go further
+                }
+
+            } else {
+
+                RedBlackNode w = toBeFixed.parent.leftChild;
+                if (w.color == Color.RED) {
+                    w.color = Color.BLACK;
+                    toBeFixed.parent.color = Color.RED;
+                    rotateRight(toBeFixed.parent);
+                    w = toBeFixed.parent.leftChild; // go up
+                }
+
+                if (w.rightChild.color == Color.BLACK && w.leftChild.color == Color.BLACK) {
+                    w.color = Color.RED;
+                    toBeFixed = toBeFixed.parent;
+                    continue;
+                } else if (w.leftChild.color == Color.BLACK) {
+                    w.rightChild.color = Color.BLACK;
+                    w.color = Color.RED;
+                    rotateLeft(w);
+                    w = toBeFixed.parent.leftChild;
+                }
+                if (w.leftChild.color == Color.RED) {
+                    w.color = toBeFixed.parent.color;
+                    toBeFixed.parent.color = Color.BLACK;
+                    w.leftChild.color = Color.BLACK;
+                    rotateRight(toBeFixed.parent);
+                    toBeFixed = root;  // no need to go further
+                }
+            }
+
+        }
+        toBeFixed.color = Color.BLACK;
+        // inorder_traversal(root);
+    }
+
+    private void reLinkNodes(RedBlackNode deleted_node, RedBlackNode replacement) {
+        // means we are deleting root
+        if (deleted_node.parent == nil) {
+            root = replacement;
+        } else if (deleted_node == deleted_node.parent.leftChild) {
+            deleted_node.parent.leftChild = replacement;
+        } else {
+            deleted_node.parent.rightChild = replacement;
+        }
+
+        replacement.parent = deleted_node.parent;  // if it was root then it would be linked to null
+
+
+    }
+
+    private RedBlackNode findInorderSuccessor(RedBlackNode node) {
+        // here we need to find the replacement in right subtree of node
+        // One more assumption is the right subtree cannot be null if we are having degree 2 node
+        while (node.leftChild != nil) {
+            node = node.leftChild;
+        }
+        return node;
+    }
+
     // if RED node is deleted then no re-balancing
 
 
-    private void deleteLeafNode(Node deleted_node) {
+    private void deleteLeafNode(RedBlackNode deleted_node) {
         if (deleted_node.equals(root)) {
             root = null;
         }
@@ -309,7 +328,7 @@ public class RedBlack {
         }
     }
 
-    private void deleteBlackLeaf(Node deleted_node, int relation) {
+    private void deleteBlackLeaf(RedBlackNode deleted_node, int relation) {
         // we first identify what our Xcn is
         /*if relation is 1 then X=L
         py's other child could be null therefore c = BLACK or whatever it is
@@ -317,7 +336,7 @@ public class RedBlack {
         if v is nul then 0 else count it
         * */
         Color c;
-        Node v, py, y;
+        RedBlackNode v, py, y;
         int n = 0;
         if (relation == 1) {
             // get color of node in right side
@@ -403,7 +422,7 @@ public class RedBlack {
 
             int r2;
             // we need to get node whose color is red and parent in v
-            Node a;
+            RedBlackNode a;
             if (v.leftChild != null) {
                 a = v.leftChild;
                 r2 = 1;
@@ -417,7 +436,7 @@ public class RedBlack {
 
         // Case 2-> Xb2
         int r2;
-        Node w;
+        RedBlackNode w;
         if (n == 2 && v.color == Color.BLACK) {
             if (r1 == 1) {
                 r2 = 0;  // we select opposite since we need LR or RL
@@ -440,7 +459,7 @@ public class RedBlack {
 
     }
 
-    private void operationXb2(int relation1, int relation2, Node p, Node pp, Node gp) {
+    private void operationXb2(int relation1, int relation2, RedBlackNode p, RedBlackNode pp, RedBlackNode gp) {
         if (relation1 == 1 && relation2 == 0) { // LRb
             operationLRb(p, pp, gp);
         } else if (relation1 == 0 && relation2 == 1) { //RLb
@@ -454,12 +473,12 @@ public class RedBlack {
         flipColor(p);
     }
 
-    private boolean isLeaf(Node deleted_node) {
+    private boolean isLeaf(RedBlackNode deleted_node) {
         return deleted_node.leftChild == null && deleted_node.rightChild == null;
     }
 
 
-    private void operationXb1(int relation1, int relation2, Node p, Node pp, Node gp) {
+    private void operationXb1(int relation1, int relation2, RedBlackNode p, RedBlackNode pp, RedBlackNode gp) {
         if (relation1 == 1 && relation2 == 1) { //LLb
             operationLLb(p, pp, gp);
         } else if (relation1 == 1 && relation2 == 0) { // LRb
@@ -477,7 +496,7 @@ public class RedBlack {
 
     }
 
-    private void operationXb0(Node py, Node v) {
+    private void operationXb0(RedBlackNode py, RedBlackNode v) {
         if (py.color == Color.BLACK) {
             flipColor(v); // TODO go up and re balance
         } else {
@@ -487,7 +506,7 @@ public class RedBlack {
     }
 
     // following function handles case when deleted node is black and
-    private void deleteNodeWithDegreeOne(Node deleted_node) {
+    private void deleteNodeWithDegreeOne(RedBlackNode deleted_node) {
         int relation = identifyRelation(deleted_node.parent, deleted_node);
         if (deleted_node.color == Color.BLACK && deleted_node.leftChild != null && deleted_node.leftChild.color == Color.RED) {
             //y is deleted_node.leftChild
@@ -510,7 +529,7 @@ public class RedBlack {
 
     }
 
-    private void linkDegreeOne(int position, Node deleted_node, Node link) {
+    private void linkDegreeOne(int position, RedBlackNode deleted_node, RedBlackNode link) {
         if (position == 1) {
             deleted_node.parent.leftChild = link;
         } else {
@@ -518,7 +537,7 @@ public class RedBlack {
         }
     }
 
-    private Node findNode(int val, Node iterator) {
+    public RedBlackNode findNode(int val, RedBlackNode iterator) {
         if (root == nil) {
             return null;
         }
@@ -542,57 +561,13 @@ public class RedBlack {
         }
     }
 
-    public void insert(Node node) {
 
-        /**
-         * 1. Root is always black
-         * 2. New Node is given RED
-         */
-
-        if (root == nil) {
-            root = node;
-            root.parent = nil;
-            return;
-        }
-        // find correct position of new node
-        Node iterator = root;
-        Node p, pp, gp;
-        //gp = null; // when inserted as the child of root
-        while (true) {
-            if (iterator.bldg_no < node.bldg_no) {
-                if (iterator.rightChild == nil) {
-                    iterator.rightChild = node;
-                    p = iterator.rightChild; //pointer to new node
-                    p.parent = iterator;
-                    break;
-                } else {
-                    iterator = iterator.rightChild;
-                }
-
-            } else if (iterator.bldg_no > node.bldg_no) {     //TODO add = for duplicate
-                if (iterator.leftChild == nil) {
-                    iterator.leftChild = node;
-                    p = iterator.leftChild; //pointer to new node
-                    p.parent = iterator;
-                    break;
-                } else {
-                    iterator = iterator.leftChild;
-                }
-
-            }
-        }
-        pp = p.parent;
-        gp = pp.parent;  // gp could be null if insertion was at the child of root
-
-        insert_balancing(p, pp, gp);
-    }
-
-    private void insert_balancing(Node p, Node pp, Node gp) {
+    private void insert_balancing(RedBlackNode p, RedBlackNode pp, RedBlackNode gp) {
 
         if (checkIfConsecutiveRed(p, pp, gp)) {
             //perform XYz operation
             // check child of color of gp i.e. color of z
-            Node d = getChildOfGrandParent(pp, gp);  // this will return our 'd' node
+            RedBlackNode d = getChildOfGrandParent(pp, gp);  // this will return our 'd' node
             Color c_d;
             if (d == nil) {
                 c_d = Color.BLACK;  // external node
@@ -610,7 +585,7 @@ public class RedBlack {
                 //LLb
                 int relation1 = identifyRelation(gp, pp);
                 int relation2 = identifyRelation(pp, p);
-                System.out.println(relation1 + " " + relation2);
+
 
                 if (relation1 == 1 && relation2 == 1) { //LLb
                     operationLLb(p, pp, gp);
@@ -641,14 +616,14 @@ public class RedBlack {
     }
 
     // this will tell what kind of relation it is L or R  1->L and 0 ->R
-    private int identifyRelation(Node parent, Node child) {
+    private int identifyRelation(RedBlackNode parent, RedBlackNode child) {
         if (parent.leftChild != nil && parent.leftChild.equals(child)) {
             return 1;
         }
         return 0;
     }
 
-    private void operationRLb(Node p, Node pp, Node gp) {
+    private void operationRLb(RedBlackNode p, RedBlackNode pp, RedBlackNode gp) {
         //Here first perform right rotation and then left i.e. LR = RR + LL
         pp.leftChild = p.rightChild; //b
         if (pp.leftChild != nil) {
@@ -665,7 +640,7 @@ public class RedBlack {
 
     }
 
-    private void operationRRb(Node p, Node pp, Node gp) {
+    private void operationRRb(RedBlackNode p, RedBlackNode pp, RedBlackNode gp) {
         gp.rightChild = pp.leftChild;  // c
         if (pp.leftChild != nil) {
             pp.leftChild.parent = gp;
@@ -692,7 +667,7 @@ public class RedBlack {
         flipColor(gp);
     }
 
-    private void operationLRb(Node p, Node pp, Node gp) {
+    private void operationLRb(RedBlackNode p, RedBlackNode pp, RedBlackNode gp) {
         //Here first perform right rotation and then left  LR = RR + LL
         pp.rightChild = p.leftChild; //b
         if (pp.rightChild != nil) {
@@ -709,7 +684,7 @@ public class RedBlack {
 
     }
 
-    private void operationLLb(Node p, Node pp, Node gp) {
+    private void operationLLb(RedBlackNode p, RedBlackNode pp, RedBlackNode gp) {
         gp.leftChild = pp.rightChild;  // c
         if (pp.rightChild != nil) {
             pp.rightChild.parent = gp;
@@ -736,7 +711,7 @@ public class RedBlack {
         flipColor(gp);
     }
 
-    private int getParentChildPointer(Node parent, Node child) {
+    private int getParentChildPointer(RedBlackNode parent, RedBlackNode child) {
         if (parent.leftChild != nil && parent.leftChild.equals(child)) {
             return 1;
         }
@@ -744,7 +719,7 @@ public class RedBlack {
     }
 
 
-    private void operationXYr(Node pp, Node gp, Node d) {
+    private void operationXYr(RedBlackNode pp, RedBlackNode gp, RedBlackNode d) {
 //        if (!gp.equals(root)) {
 //            flipColor(gp);   // we don't flip
 //        }
@@ -753,7 +728,7 @@ public class RedBlack {
         flipColor(pp);
     }
 
-    private void flipColor(Node node) {
+    private void flipColor(RedBlackNode node) {
         if (node.equals(root)) {
             node.color = Color.BLACK;
             return;
@@ -765,7 +740,7 @@ public class RedBlack {
         node.color = Color.RED;
     }
 
-    private Node getChildOfGrandParent(Node pp, Node gp) {
+    private RedBlackNode getChildOfGrandParent(RedBlackNode pp, RedBlackNode gp) {
         if (gp.leftChild == nil || gp.rightChild == nil) {
             return nil;  //external node
         }
@@ -775,7 +750,7 @@ public class RedBlack {
         return gp.leftChild;
     }
 
-    private boolean checkIfConsecutiveRed(Node p, Node pp, Node gp) {
+    private boolean checkIfConsecutiveRed(RedBlackNode p, RedBlackNode pp, RedBlackNode gp) {
         if (gp == nil) {
             // it means that it is inserted as child of root and pp has to be black
             return false;
@@ -786,13 +761,34 @@ public class RedBlack {
         return false;
     }
 
-    private static Color getColor(Node node) {
+    private static Color getColor(RedBlackNode node) {
         return node.color;
     }
 
-    private static void changeColor(Node node, Color c) {
+    private static void changeColor(RedBlackNode node, Color c) {
         node.color = c;
     }
 
+
+    public boolean printRange(RedBlackNode iterator, int bldg_no1, int bldg_no2) {
+        if (iterator == null) {
+            return false;
+        }
+        // it is more like inorder traversal, we keep moving left and then we go up in call stack and print it.
+        if (bldg_no1 < iterator.bldg_no) {
+            printRange(iterator.leftChild, bldg_no1, bldg_no2);
+        }
+
+        if (bldg_no1 <= iterator.bldg_no && bldg_no2 >= iterator.bldg_no) {
+            System.out.println("PrintRange-> " + iterator);
+        }
+
+        if (bldg_no2 > iterator.bldg_no) {
+            printRange(iterator.rightChild, bldg_no1, bldg_no2);
+        }
+
+        return true;
+
+    }
 
 }
