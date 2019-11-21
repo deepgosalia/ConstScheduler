@@ -568,10 +568,12 @@ public class RedBlack {
             //perform XYz operation
             // check child of color of gp i.e. color of z
             RedBlackNode d = getChildOfGrandParent(pp, gp);  // this will return our 'd' node
+            //System.out.println("debug: " + d);
             Color c_d;
             if (d == nil) {
                 c_d = Color.BLACK;  // external node
             } else {
+               // System.out.println("debug: " + d);
                 c_d = d.color;
             }
 
@@ -607,7 +609,7 @@ public class RedBlack {
             if (p != nil && !p.equals(root)) {
                 pp = p.parent;
                 if (pp != nil && !pp.equals(root)) {
-                    gp = p.parent;
+                    gp = pp.parent;    // TODO  change was made here  IMP
                     insert_balancing(p, pp, gp);
                 }
             }

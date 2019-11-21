@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,7 +19,7 @@ public class Heap {
     public HeapNode removeMin() {
 
         if (list.size() == 0) {
-            System.out.println("Min Cannot be removed");
+           // System.out.println("Min Cannot be removed");
             return null;
         }else{
             HeapNode minNode = getMin();
@@ -35,10 +34,10 @@ public class Heap {
     }
 
     public void print_heap() {
-        System.out.println("heap size is " + list.size());
+       // System.out.println("heap size is " + list.size());
         for (HeapNode heapNode : list) {
 
-            System.out.print("heap is "+heapNode.bldg_no + "->" + heapNode.executed_time + ", ");
+          //  System.out.print("heap is "+heapNode.bldg_no + "->" + heapNode.executed_time + ", ");
         }
 
     }
@@ -62,7 +61,7 @@ public class Heap {
         // replace with the last node
         list.set(0, list.get(list.size() - 1));
         list.remove(list.size() - 1);
-        System.out.println("At heapify_down " + list);
+        //System.out.println("At heapify_down " + list);
         /* now start checking with children till we reach the last node
         Leaf nodes wont have any children so they will return -1
         * */

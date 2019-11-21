@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.Scanner;
 
 public class Main {
     private static String fileName = "input.txt";
@@ -16,7 +17,8 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         File file = new File("input.txt");
-        BufferedReader bufferedReader = new BufferedReader(new FileReader(file)); // TODO Handle exception
+        Scanner scanner = new Scanner(file);
+        //BufferedReader bufferedReader = new BufferedReader(new FileReader(file)); // TODO Handle exception
         String st = null;
         String[] inputLine = null;
         // initialize data structure
@@ -24,8 +26,9 @@ public class Main {
         redBlack = new RedBlack();
 
         while (true) {
-            System.out.println("On Day " + day);
-            if (st == null && (st = bufferedReader.readLine()) != null) {
+           // System.out.println("On Day " + day);
+            if (st == null && scanner.hasNext()) {
+                st = scanner.nextLine();
                 st = st.trim();// if there are ending whitespace then it will removed
                 if (!st.equals("")) { //..if it is true then it   means that it will be at the blank line
                     inputLine = st.split(":|\\(|,|\\)"); // this is read as : OR ( OR.....  It will split to multiple delimiter
@@ -55,7 +58,8 @@ public class Main {
                 if (currentTask.executed_time == currentTask.total_time) {  // TODO can total time be zero??
                     // should we push it back and then print or simply print i
                     // remove from rbt
-                    System.out.println(currentTask.bldg_no + " completed on " + day);
+                   // System.out.println(currentTask.bldg_no + " completed on " + day);
+                    System.out.println(currentTask);
                     redBlack.delete(currentTask.ptr);
                     currentTask = null;
                     isConstructingBuilding = false;
@@ -71,40 +75,37 @@ public class Main {
             if(!isConstructingBuilding && day!=0){
 
                 currentTask = pickNextBuilding();      // pick next building and update current
-                heap.print_heap();
-                if (currentTask == null) {
+//                heap.print_heap();
+                if (currentTask == null && st==null && !scanner.hasNext()) {
                     //Means there is nothing to construct and heap is empty
+                    //System.out.println("Here3");
                     break;
                 }else {
-                    System.out.println("Now starting: " + currentTask);
+                    //System.out.println("Now starting: " + currentTask);
                 }
             }
 
             if (day % 5 == 0) {  // either fifth day or previous task was completed
                 if (day == 0) { // here we start working on the first construction
-                    System.out.println("heap before");
-                    heap.print_heap();
                     currentTask = startConstruction();
-                    System.out.println("heap after");
-                    if (currentTask == null) {
+                    if (currentTask == null && st==null && !scanner.hasNext()) {
+                        //System.out.println("Here2");
                         break;
                     }else{
-                        heap.print_heap();
-                        System.out.println("Now starting: " + currentTask);
+                        //System.out.println("Now starting: " + currentTask);
                     }
                 } else {
                     if (isConstructingBuilding) {  // if building is still constructing
-                        System.out.println(currentTask.bldg_no + " was partially completed on day " + day);
-                        System.out.println("heap before");
-                        heap.print_heap();
+//                        System.out.println(currentTask.bldg_no + " was partially completed on day " + day);
+//                        System.out.println("heap before");
+//                        heap.print_heap();
                         currentTask = pickNextBuilding();      // pick next building and update current
-                        System.out.println("heap after");
-                        if (currentTask == null) {
+                        if (currentTask == null && st==null && !scanner.hasNext()) {   // TODO recheck condition
                             //Means there is nothing to construct and heap is empty
+                           // System.out.println("Here1");
                             break;
                         }else {
-                            heap.print_heap();
-                            System.out.println("Now starting: " + currentTask);
+                           // System.out.println("Now starting: " + currentTask);
                         }
                     }
                 }
@@ -141,10 +142,10 @@ public class Main {
 
         if (input_action.equals("insert")) {
             performInsert(input_parameter[0], input_parameter[1]);// bldg_no-->[0], total_time-->[1]
-        } else if (input_action.equals("print") && inputLine.length > 3) {
+        } else if (input_action.equals("printbuilding") && inputLine.length > 3) {
             performPrintRange(input_parameter[0], input_parameter[1]);
 
-        } else if (input_action.equals("print")) {
+        } else if (input_action.equals("printbuilding")) {
             performPrint(input_parameter[0]);
         }
     }
@@ -166,7 +167,7 @@ public class Main {
         if (redBlackNode == null) {
             System.out.println("No such element");
         } else {
-            System.out.println("Print-> " + redBlackNode);
+            System.out.println("Print-> " + redBlackNode + " "+day);
         }
 
     }
@@ -175,7 +176,7 @@ public class Main {
     private static void performPrintRange(int bldg_no1, int bldg_no2) {
         boolean result = redBlack.printRange(redBlack.getRoot(), bldg_no1, bldg_no2);   // check if false is given when nothing in range
         if (!result) {
-            System.out.println("No elements exist in range");
+            System.out.println("No elements exist in range" + " " + day);
         }
     }
 
