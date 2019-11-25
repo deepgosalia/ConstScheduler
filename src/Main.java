@@ -1,6 +1,20 @@
 import java.io.*;
 import java.util.Scanner;
 
+/***
+ * Current issue:
+ * remove that empty line at then end of the (0,0,0)
+ *
+ * Check for duplicates
+ * remove comma
+ *
+ * Code to remove duplicate
+ *
+ *
+ */
+
+
+
 public class Main {
     private static String fileName = "input.txt";
     private static int day = 0;
@@ -24,9 +38,9 @@ public class Main {
         // initialize data structure
         heap = new Heap();
         redBlack = new RedBlack();
-
+        int consDay = 0;
         while (true) {
-           // System.out.println("On Day " + day);
+//            System.out.println("On day " + day);
             if (st == null && scanner.hasNext()) {
                 st = scanner.nextLine();
                 st = st.trim();// if there are ending whitespace then it will removed
@@ -34,11 +48,22 @@ public class Main {
                     inputLine = st.split(":|\\(|,|\\)"); // this is read as : OR ( OR.....  It will split to multiple delimiter
                     input_count = Integer.parseInt(inputLine[0].trim());
                 }
-//                else {
-//                    heap.print_heap();
-//                    redBlack.inorder_traversal(redBlack.getRoot());
-//                    break;  // means EOF that is line after last line which is blank
+            }
+
+//            if (st != null && day == input_count) { // if not null then we have some work to do and we are waiting for our count to reach that state
+//                // it is day when we need to perform action
+//                if (inputLine != null) {
+//                    performAction(inputLine);
+//                    st = null;  // mean ready to take next input
 //                }
+//            }
+
+            if (currentTask != null) {  // current working building
+                ++currentTask.executed_time;
+                ++currentTask.ptr.executed_time;  // for red black tree
+                ++consDay;
+
+                //TODO should we update at every second
             }
 
             if (st != null && day == input_count) { // if not null then we have some work to do and we are waiting for our count to reach that state
@@ -46,77 +71,56 @@ public class Main {
                 if (inputLine != null) {
                     performAction(inputLine);
                     st = null;  // mean ready to take next input
-                } else {
-                    // some building are yet to complete so let them perform
                 }
-
+            }
+            if (currentTask!=null && currentTask.executed_time == currentTask.total_time) {  // TODO can total time be zero??
+                // should we push it back and then print or simply print i
+                // remove from rbt
+               System.out.println("("+currentTask.bldg_no + ","+day + ")");
+                //System.out.println("Current task completed on " + currentTask);
+                redBlack.delete(currentTask.ptr);
+                currentTask = null;
+                isConstructingBuilding = false;
+                consDay = 0;
+                // should the next construction start today or next day
             }
 
-            if (currentTask != null) {
-                currentTask.executed_time++;
-                currentTask.ptr.executed_time++;  // for red black tree
-                if (currentTask.executed_time == currentTask.total_time) {  // TODO can total time be zero??
-                    // should we push it back and then print or simply print i
-                    // remove from rbt
-                   // System.out.println(currentTask.bldg_no + " completed on " + day);
-                    System.out.println(currentTask);
-                    redBlack.delete(currentTask.ptr);
-                    currentTask = null;
-                    isConstructingBuilding = false;
-                    // should the next construction start today or next day
+            if (day == 0) { // here we start working on the first construction
+                currentTask = startConstruction();
+                if (currentTask == null && st == null && !scanner.hasNext()) {
+                    //System.out.println("Here2");
+                    break;
                 }
-                //TODO should we update at every second
             }
 
+            if (consDay==5) {  // worked for 5 days
+                    //if (isConstructingBuilding) {  // if building is still constructing
+                    currentTask = pickNextBuilding();      // pick next building and update current
+                consDay  =0;
+                    if (currentTask == null && st == null && !scanner.hasNext()) {   // TODO recheck condition
+                        //Means there is nothing to construct and heap is empty
+                        break;
+                    }
+            }
 
             /**
              * Below we only pick the building and then from next day we start the construction
              * */
-            if(!isConstructingBuilding && day!=0){
-
+            if (!isConstructingBuilding && day != 0) {   // TODO moved from up to down
                 currentTask = pickNextBuilding();      // pick next building and update current
-//                heap.print_heap();
-                if (currentTask == null && st==null && !scanner.hasNext()) {
+                if (currentTask == null && st == null && !scanner.hasNext()) {
                     //Means there is nothing to construct and heap is empty
-                    //System.out.println("Here3");
                     break;
-                }else {
-                    //System.out.println("Now starting: " + currentTask);
                 }
             }
 
-            if (day % 5 == 0) {  // either fifth day or previous task was completed
-                if (day == 0) { // here we start working on the first construction
-                    currentTask = startConstruction();
-                    if (currentTask == null && st==null && !scanner.hasNext()) {
-                        //System.out.println("Here2");
-                        break;
-                    }else{
-                        //System.out.println("Now starting: " + currentTask);
-                    }
-                } else {
-                    if (isConstructingBuilding) {  // if building is still constructing
-//                        System.out.println(currentTask.bldg_no + " was partially completed on day " + day);
-//                        System.out.println("heap before");
-//                        heap.print_heap();
-                        currentTask = pickNextBuilding();      // pick next building and update current
-                        if (currentTask == null && st==null && !scanner.hasNext()) {   // TODO recheck condition
-                            //Means there is nothing to construct and heap is empty
-                           // System.out.println("Here1");
-                            break;
-                        }else {
-                           // System.out.println("Now starting: " + currentTask);
-                        }
-                    }
-                }
-            }
             day++;
         }
     }
 
     private static HeapNode pickNextBuilding() {
-        //
         if (currentTask != null) {
+           // System.out.println(currentTask + " was partially completed");
             heap.insert(currentTask);  // push current building
         }
         return startConstruction();
@@ -124,6 +128,7 @@ public class Main {
 
     private static HeapNode startConstruction() {
         currentTask = heap.removeMin();
+        //System.out.println("Now starting " + currentTask);
         if (currentTask != null) {
             isConstructingBuilding = true;
             return currentTask;
@@ -154,6 +159,7 @@ public class Main {
         HeapNode heapNode = new HeapNode(bldg_no, 0, total_time);// executed time is 0 initially
         heap.insert(heapNode);
 
+       // heap.print_heap();
         RedBlackNode redBlackNode = new RedBlackNode(Color.RED, bldg_no, 0, total_time, redBlack.getNil()); // getNil for the external node which is taken as nil
         redBlack.insert(redBlackNode);
 
@@ -165,9 +171,9 @@ public class Main {
     private static void performPrint(int bldg_no) {
         RedBlackNode redBlackNode = redBlack.findNode(bldg_no, redBlack.getRoot());
         if (redBlackNode == null) {
-            System.out.println("No such element");
+            System.out.println("(0,0,0)"); // TODO doubt-> can this be hardcoded
         } else {
-            System.out.println("Print-> " + redBlackNode + " "+day);
+            System.out.println(redBlackNode);
         }
 
     }
@@ -176,7 +182,9 @@ public class Main {
     private static void performPrintRange(int bldg_no1, int bldg_no2) {
         boolean result = redBlack.printRange(redBlack.getRoot(), bldg_no1, bldg_no2);   // check if false is given when nothing in range
         if (!result) {
-            System.out.println("No elements exist in range" + " " + day);
+            System.out.println("(0,0,0)");
+        }else{
+            System.out.println(day);
         }
     }
 

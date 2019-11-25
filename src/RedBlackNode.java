@@ -18,6 +18,6 @@ public class RedBlackNode {
     }
     @Override
     public String toString(){
-        return this.bldg_no + ", "+this.executed_time + ", " + this.total_time +", ptr:" +ptr.bldg_no;
+        return "("+this.bldg_no + ","+this.executed_time + "," + this.total_time + ")";
     }
 }

@@ -573,7 +573,7 @@ public class RedBlack {
             if (d == nil) {
                 c_d = Color.BLACK;  // external node
             } else {
-               // System.out.println("debug: " + d);
+                // System.out.println("debug: " + d);
                 c_d = d.color;
             }
 
@@ -782,7 +782,7 @@ public class RedBlack {
         }
 
         if (bldg_no1 <= iterator.bldg_no && bldg_no2 >= iterator.bldg_no) {
-            System.out.println("PrintRange-> " + iterator);
+            System.out.print(iterator + ",");  // TODO remove extra comma at the end
         }
 
         if (bldg_no2 > iterator.bldg_no) {
