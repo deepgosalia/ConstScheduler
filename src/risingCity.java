@@ -15,9 +15,10 @@ import java.util.Scanner;
 
 
 
-public class Main {
-    private static String fileName = "input.txt";
+public class risingCity {
+
     private static int day = 0;
+    static FileWriter fileWriter;
 
     private static int input_count = 0;   // timer taken from the input  i.e 0, 2 ,5...
     private static String input_action;   //action-> print, insert, ...
@@ -30,9 +31,11 @@ public class Main {
     private static HeapNode currentTask;
 
     public static void main(String[] args) throws IOException {
-        File file = new File("input.txt");
+        File file = new File(args[0]);
         Scanner scanner = new Scanner(file);
-        //BufferedReader bufferedReader = new BufferedReader(new FileReader(file)); // TODO Handle exception
+
+        // File writer to write the output
+        fileWriter = new FileWriter("output_file.txt");
         String st = null;
         String[] inputLine = null;
         // initialize data structure
@@ -40,7 +43,7 @@ public class Main {
         redBlack = new RedBlack();
         int consDay = 0;
         while (true) {
-//            System.out.println("On day " + day);
+           //System.out.println("On day " + day);
             if (st == null && scanner.hasNext()) {
                 st = scanner.nextLine();
                 st = st.trim();// if there are ending whitespace then it will removed
@@ -49,14 +52,6 @@ public class Main {
                     input_count = Integer.parseInt(inputLine[0].trim());
                 }
             }
-
-//            if (st != null && day == input_count) { // if not null then we have some work to do and we are waiting for our count to reach that state
-//                // it is day when we need to perform action
-//                if (inputLine != null) {
-//                    performAction(inputLine);
-//                    st = null;  // mean ready to take next input
-//                }
-//            }
 
             if (currentTask != null) {  // current working building
                 ++currentTask.executed_time;
@@ -76,8 +71,8 @@ public class Main {
             if (currentTask!=null && currentTask.executed_time == currentTask.total_time) {  // TODO can total time be zero??
                 // should we push it back and then print or simply print i
                 // remove from rbt
-               System.out.println("("+currentTask.bldg_no + ","+day + ")");
-                //System.out.println("Current task completed on " + currentTask);
+               String op = "("+currentTask.bldg_no + ","+day + ")\n";
+                fileWriter.append(op);
                 redBlack.delete(currentTask.ptr);
                 currentTask = null;
                 isConstructingBuilding = false;
@@ -116,6 +111,7 @@ public class Main {
 
             day++;
         }
+        fileWriter.close();
     }
 
     private static HeapNode pickNextBuilding() {
@@ -138,7 +134,7 @@ public class Main {
         }
     }
 
-    private static void performAction(String[] inputLine) {
+    private static void performAction(String[] inputLine) throws IOException {
         input_action = inputLine[1].trim().toLowerCase();  // to prevent conflict between Insert and insert
         input_parameter[0] = Integer.parseInt(inputLine[2].trim());
         if (inputLine.length > 3) {
@@ -168,24 +164,22 @@ public class Main {
         redBlackNode.ptr = heapNode;
     }
 
-    private static void performPrint(int bldg_no) {
+    private static void performPrint(int bldg_no) throws IOException {
         RedBlackNode redBlackNode = redBlack.findNode(bldg_no, redBlack.getRoot());
         if (redBlackNode == null) {
-            System.out.println("(0,0,0)"); // TODO doubt-> can this be hardcoded
+
+            fileWriter.append("(0,0,0)");
+             // TODO doubt-> can this be hardcoded
         } else {
-            System.out.println(redBlackNode);
+            fileWriter.append(redBlackNode.toString());
         }
 
     }
 
 
-    private static void performPrintRange(int bldg_no1, int bldg_no2) {
-        boolean result = redBlack.printRange(redBlack.getRoot(), bldg_no1, bldg_no2);   // check if false is given when nothing in range
-        if (!result) {
-            System.out.println("(0,0,0)");
-        }else{
-            System.out.println(day);
-        }
+    private static void performPrintRange(int bldg_no1, int bldg_no2) throws IOException {
+        redBlack.writeRange(redBlack.getRoot(), bldg_no1, bldg_no2,fileWriter);   // check if false is given when nothing in range
+
     }
 
 }

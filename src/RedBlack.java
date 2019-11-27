@@ -1,4 +1,8 @@
-
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RedBlack {
 
@@ -772,25 +776,47 @@ public class RedBlack {
     }
 
 
-    public boolean printRange(RedBlackNode iterator, int bldg_no1, int bldg_no2) {
+    public void writeRange(RedBlackNode iterator, int bldg_no1, int bldg_no2, FileWriter writer) throws IOException {
+        // we will use list for appending our end result to the arrayList
+        List<RedBlackNode> list = new ArrayList<>();
+        printRange(iterator,list,bldg_no1, bldg_no2);
+        // write list to the file
+
+        if(list.size()==0){
+            // print (0,0,0)
+            writer.append("(0,0,0)\n");
+        }else{
+            for (int i = 0;i<list.size();i++) {
+                //String op = list.get(i).toString();
+                writer.append(list.get(i).toString());
+                if(i==list.size()-1){
+                    writer.append("\n");
+                }else{
+                    writer.append(",");
+                }
+            }
+        }
+
+    }
+
+
+    private void printRange(RedBlackNode iterator, List<RedBlackNode> list, int bldg_no1, int bldg_no2) {
         if (iterator == null) {
-            return false;
+            return;
         }
         // it is more like inorder traversal, we keep moving left and then we go up in call stack and print it.
         if (bldg_no1 < iterator.bldg_no) {
-            printRange(iterator.leftChild, bldg_no1, bldg_no2);
+            printRange(iterator.leftChild, list,bldg_no1, bldg_no2);
         }
 
         if (bldg_no1 <= iterator.bldg_no && bldg_no2 >= iterator.bldg_no) {
-            System.out.print(iterator + ",");  // TODO remove extra comma at the end
+            list.add(iterator);
+            //System.out.print(iterator + ",");  // TODO remove extra comma at the end
         }
 
         if (bldg_no2 > iterator.bldg_no) {
-            printRange(iterator.rightChild, bldg_no1, bldg_no2);
+            printRange(iterator.rightChild, list,bldg_no1, bldg_no2);
         }
-
-        return true;
-
     }
 
 }
