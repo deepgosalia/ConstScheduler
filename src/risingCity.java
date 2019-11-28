@@ -179,7 +179,6 @@ public class risingCity {
 
     private static void performPrintRange(int bldg_no1, int bldg_no2) throws IOException {
         redBlack.writeRange(redBlack.getRoot(), bldg_no1, bldg_no2,fileWriter);   // check if false is given when nothing in range
-
     }
 
 }
